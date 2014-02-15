@@ -126,7 +126,6 @@ public final class GameApi {
       return "VerifyMove";
     }
 
-
   }
 
   public abstract static class Operation extends HasEquality { }

@@ -26,5 +26,9 @@ public class Position {
 	public void setColumn(int column){
 		this.column = column;
 	}
+	
+	public boolean is_in_board(){
+		return (row >= 0 && row < 7 && column >= 0 && column < 7);
+	}
 }
 
