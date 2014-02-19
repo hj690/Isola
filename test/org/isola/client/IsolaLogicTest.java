@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.isola.client.GameApi.Operation;
 import org.isola.client.GameApi.Set;
+import org.isola.client.GameApi.SetTurn;
 import org.isola.client.GameApi.EndGame;
 import org.isola.client.GameApi.VerifyMove;
 import org.isola.client.GameApi.VerifyMoveDone;
@@ -56,11 +57,13 @@ public class IsolaLogicTest {
 	
 
 	private VerifyMove move(int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
-		return new VerifyMove(rId, playersInfo,
+		return new VerifyMove(playersInfo,
 		// we never need to check the resulting state
 		// (the server makes it, and the game doesn't have any hidden decisions such in Battleships)
 		emptyState, 
-		lastState, lastMove, lastMovePlayerId);
+		lastState, lastMove, lastMovePlayerId,
+		//playerIdToNumberOfTokensInPot
+		null);
 	}
 
 	
@@ -78,7 +81,7 @@ public class IsolaLogicTest {
 				.build();
 		 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 44"), 
 				new Set(DESTROY, "44"));
 
@@ -109,7 +112,7 @@ public class IsolaLogicTest {
 
 		//lastmove
 		List<Operation> operations = ImmutableList.<Operation> of( 
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "03, 14"), 
 				new Set(DESTROY, "66"));
 
@@ -130,7 +133,7 @@ public class IsolaLogicTest {
 				.build();
 	
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId),  
 				new Set(MOVE, "63, 52"), 
 				new Set(DESTROY, "12"));
 
@@ -151,7 +154,7 @@ public class IsolaLogicTest {
 				.build();
 	
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "65, 66"), 
 				new Set(DESTROY, "00"));
 
@@ -172,7 +175,7 @@ public class IsolaLogicTest {
 				.build();
 	
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "06, 05"), 
 				new Set(DESTROY, "56"));
 
@@ -193,7 +196,7 @@ public class IsolaLogicTest {
 				.build();
 	
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "60, 51"), 
 				new Set(DESTROY, "00"));
 
@@ -216,7 +219,7 @@ public class IsolaLogicTest {
 				.build();
 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "03, 14"), 
 				new Set(DESTROY, "66"));
 
@@ -237,7 +240,7 @@ public class IsolaLogicTest {
 				.build();
 		  
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "65, 66"), 
 				new Set(DESTROY, "11"));
 
@@ -258,7 +261,7 @@ public class IsolaLogicTest {
 				.build();
 		  
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "66, 65"), 
 				new Set(DESTROY, "00"));
 
@@ -279,7 +282,7 @@ public class IsolaLogicTest {
 				.build();
 		  
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "66, 67"), 
 				new Set(DESTROY, "00"));
 
@@ -300,7 +303,7 @@ public class IsolaLogicTest {
 				.build();
 		  
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "60, 70"), 
 				new Set(DESTROY, "01"));
 
@@ -321,7 +324,7 @@ public class IsolaLogicTest {
 				.build();
 		  
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "00, 02"), 
 				new Set(DESTROY, "01"));
 
@@ -342,7 +345,7 @@ public class IsolaLogicTest {
 				.build();
 		 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 00"), 
 				new Set(DESTROY, "11"));
 
@@ -363,7 +366,7 @@ public class IsolaLogicTest {
 				.build();
 		
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 33"), 
 				new Set(DESTROY, "11"));
 
@@ -384,7 +387,7 @@ public class IsolaLogicTest {
 				.build();
 	
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 53"), 
 				new Set(DESTROY, "00"));
 
@@ -406,7 +409,7 @@ public class IsolaLogicTest {
 				.build();
 	 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "00, 01"), 
 				new Set(DESTROY, "18"));
 
@@ -427,7 +430,7 @@ public class IsolaLogicTest {
 				.build();
 		 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 44"), 
 				new Set(DESTROY, "53"));
 
@@ -449,7 +452,7 @@ public class IsolaLogicTest {
 				.build();
 		 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 44"), 
 				new Set(DESTROY, "33"));
 
@@ -473,7 +476,7 @@ public class IsolaLogicTest {
 				.build();
 		 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,R), 
+				new SetTurn(rId), 
 				new Set(MOVE, "43, 52"), 
 				new Set(DESTROY, "21"),
 				new EndGame(gId)
@@ -497,7 +500,7 @@ public class IsolaLogicTest {
 				.build();
 	 
 		List<Operation> operations = ImmutableList.<Operation> of(
-				new Set(TURN,G), 
+				new SetTurn(gId), 
 				new Set(MOVE, "24, 25"), 
 				new Set(DESTROY, "22"),
 				new EndGame(rId)

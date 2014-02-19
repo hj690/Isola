@@ -8,5 +8,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="D:/game/guava-16.0.1.jar"/>
 	<classpathentry kind="lib" path="D:/game/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="/Users/JIANG/Downloads/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="/Users/JIANG/Downloads/guava-16.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
