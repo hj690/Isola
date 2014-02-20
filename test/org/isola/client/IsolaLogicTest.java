@@ -63,7 +63,7 @@ public class IsolaLogicTest {
 		emptyState, 
 		lastState, lastMove, lastMovePlayerId,
 		//playerIdToNumberOfTokensInPot
-		null);
+		ImmutableMap.<Integer, Integer>of());
 	}
 
 	
@@ -91,10 +91,7 @@ public class IsolaLogicTest {
 	
 	
 	
-	
-	
-	
-	//================legal tests===============
+	//=======================legal tests========================
 	
 	@Test
 	public void test_red_move_rightDown() { 
@@ -203,7 +200,7 @@ public class IsolaLogicTest {
 		assertMoveOk(move(gId, state, operations));
 	}
 	
-	// ============ Illegal tests =======================
+	// ========================= Illegal tests ==========================
 	
 	@Test
 	public void test_red_move_notRedTurn() { 
@@ -461,7 +458,7 @@ public class IsolaLogicTest {
 	}
 	
 	
-	//==================== End game ======================
+	//============================ End game ==============================
 	@Test
 	public void test_endgame_green_win() { // this is legal
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()

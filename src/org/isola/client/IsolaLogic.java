@@ -11,6 +11,8 @@ import org.isola.client.GameApi.VerifyMove;
 import org.isola.client.GameApi.VerifyMoveDone;
 import org.isola.client.Color;
 
+import com.google.common.collect.ImmutableList;
+
 import static org.isola.client.Color.W;
 import static org.isola.client.Color.B;
 import static org.isola.client.Color.R;
@@ -41,7 +43,7 @@ public class IsolaLogic {
 	}
 
 	public static void checkMoveIsLegal(VerifyMove verifyMove) throws Exception {
-		IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState());
+		IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState(), verifyMove.getPlayerIds());
 		Move lastmove = gameApiOperationToIsolaMove(verifyMove.getLastMove());
 		Position destroy = gameApiOperationToIsolaDestroy(verifyMove.getLastMove());
 		Position from = lastmove.getFrom();
@@ -151,8 +153,9 @@ public class IsolaLogic {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static IsolaState gameApiStateToIsolatState(Map<String, Object> gameApiState) {
+	static IsolaState gameApiStateToIsolatState(Map<String, Object> gameApiState, List<Integer> playerIds) {
 		String turnStr = (String)gameApiState.get(TURN);
+		Color turn = (turnStr == R)? Color.R : Color.G;
 		ArrayList<String> boardStr = new ArrayList<String>();
 		boardStr.add((String)gameApiState.get("line0")); // line 0
 		boardStr.add((String)gameApiState.get("line1")); // line 1
@@ -162,7 +165,7 @@ public class IsolaLogic {
 		boardStr.add((String)gameApiState.get("line5")); // line 5
 		boardStr.add((String)gameApiState.get("line6")); // line 6
 	
-		IsolaState state = new IsolaState(turnStr, boardStr);
+		IsolaState state = new IsolaState(turn , boardStr, playerIds);
 		
 		
 		return state;

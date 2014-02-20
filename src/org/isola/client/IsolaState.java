@@ -8,15 +8,16 @@ import static org.isola.client.Color.B;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 public class IsolaState {
 	private Piece[][] board = new Piece[7][7];
 	private Color turn;
-	
-	
-	public IsolaState(){}
-	
-	public IsolaState( String turnStr, ArrayList<String> boardStr){
-		this.turn = (turnStr == "R") ? R : G;
+	private final List<Integer> playerIds;
+		
+	public IsolaState( Color turn, ArrayList<String> boardStr, List<Integer> playerIds){
+		this.turn = turn;
+		this.playerIds = playerIds;
 		for(int i = 0; i < 7; i++){ // row
 			String line = boardStr.get(i);
 			for(int j = 0; j < 7; j++){ // column
