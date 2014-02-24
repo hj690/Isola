@@ -1,18 +1,23 @@
 package org.isola.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.isola.client.GameApi.Delete;
 import org.isola.client.GameApi.EndGame;
 import org.isola.client.GameApi.Operation;
 import org.isola.client.GameApi.Set;
+import org.isola.client.GameApi.SetTurn;
 import org.isola.client.GameApi.VerifyMove;
 import org.isola.client.GameApi.VerifyMoveDone;
 import org.isola.client.Color;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.isola.client.Color.W;
 import static org.isola.client.Color.B;
 import static org.isola.client.Color.R;
@@ -41,53 +46,83 @@ public class IsolaLogic {
 				return new VerifyMoveDone(verifyMove.getLastMovePlayerId(), e.getMessage());
 		    }
 	}
-
-	public static void checkMoveIsLegal(VerifyMove verifyMove) throws Exception {
-		IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState(), verifyMove.getPlayerIds());
-		Move lastmove = gameApiOperationToIsolaMove(verifyMove.getLastMove());
-		Position destroy = gameApiOperationToIsolaDestroy(verifyMove.getLastMove());
-		Position from = lastmove.getFrom();
-		Position to = lastmove.getTo();
+	
+	 static void checkMoveIsLegal(VerifyMove verifyMove) {
+		    // Checking the operations are as expected.
+		    List<Operation> expectedOperations = getExpectedOperations(verifyMove);
+		    List<Operation> lastMove = verifyMove.getLastMove();
+		    check(expectedOperations.equals(lastMove), expectedOperations, lastMove);
+		    // We use SetTurn, so we don't need to check that the correct player did the move.
+		    // However, we do need to check the first move is done by the white player (and then in the
+		    // first MakeMove we'll send SetTurn which will guarantee the correct player send MakeMove).
+		    if (verifyMove.getLastState().isEmpty()) {
+		      check(verifyMove.getLastMovePlayerId() == verifyMove.getPlayerIds().get(0));
+		    }
+		  }
+	
+	
+	
+	
+	 @SuppressWarnings("unchecked")
+	static
+	  List<Operation> getExpectedOperations(VerifyMove verifyMove) {
+	    List<Operation> lastMove = verifyMove.getLastMove();
+	    Map<String, Object> lastApiState = verifyMove.getLastState();
+	    List<Integer> playerIds = verifyMove.getPlayerIds();
+	    if (lastApiState.isEmpty()) {
+	      return getMoveInitial(playerIds);
+	    }
+	    
+	    int lastMovePlayerId = verifyMove.getLastMovePlayerId();
+	    IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState(), verifyMove.getPlayerIds());
 		
+	    
+	    List<Position> positions = Lists.newArrayList();
+	    for(Operation operation : lastMove){
+	    	if(operation instanceof Set){//move
+	    		Set set = (Set) operation;
+	    		positions.add(strToPosition(set.getKey()));
+	    	}
+	    	else if(operation instanceof Delete){
+	    		Delete delete = (Delete) operation;
+	    		positions.add(strToPosition(delete.getKey()));
+	    	}
+	    }
+	    
+	    
+	    if(positions.size() == 2){//move operation
+	    	Position to = positions.get(0);
+	    	Position from = positions.get(1);
+	    	
+	    	//if move the right piece
+			Color turn = laststate.getTurn();
+			check(laststate.getPieceColor(from) == turn);
+			
+			//if from position ok
+			check(from.is_in_board());
+			
+			//is move to neighbor?
+			check(move_to_neighbor(from, to));
+			
+			//if to position ok
+			check(laststate.getPieceColor(to) == W);
+	    }
+	    	
+	    
+	    else if(positions.size() == 1){// destroy operation
+	    	Position destroy = positions.get(0);
+	    	//if destroy position ok
+			check(destroy.is_in_board() && laststate.getPieceColor(destroy) == W);
+	    }
 		
-		//if move the right piece
-		Color turn = laststate.getTurn();
-		if(laststate.getPieceColor(from) != turn)
-			throw new Exception("We have a hacker!");
-		
-		
-		//if from position ok
-		if(!from.is_in_board())
-			throw new Exception("We have a hacker!");
-		
-		
-		//is move to neighbor?
-		if(!move_to_neighbor(from, to))
-			throw new Exception("We have a hacker!");
-		
-		//if to position ok
-		if(laststate.getPieceColor(to) != W)
-			throw new Exception("We have a hacker!");
-		
-		//make move
-		laststate.setPieceColor(to, turn);
-		laststate.setPieceColor(from, W);
-		
-		//if destroy position ok
-		if(!destroy.is_in_board() || laststate.getPieceColor(destroy) != W)
-			throw new Exception("We have a hacker!");
-		
-		
-		laststate.setPieceColor(destroy, B);
+	    else{
+	    }
 		
 		//if end game
-		if(!is_End_Game(laststate, verifyMove.getLastMove()))
-			throw new Exception("We have a hacker!");
-
-	}
-	
-	
-	
+		check(is_End_Game(laststate, verifyMove.getLastMove()));
+		
+		return verifyMove.getLastMove();
+	  }
 
 
 	private static boolean move_to_neighbor(Position from, Position to) {
@@ -97,50 +132,18 @@ public class IsolaLogic {
 		}
 		return false;
 	}
-
-	private static Position gameApiOperationToIsolaDestroy(
-			List<Operation> lastMove) {
-		for(int i = 0; i < lastMove.size(); i++){
-			Set set = (Set)lastMove.get(i);
-			if(set.getKey() == DESTROY){
-				String destroyStr = (String)set.getValue(); // eg. "11, 22"
-				Position toBeDestroy = strToPosition(destroyStr);
-				return toBeDestroy;
-			}
-		}
-		return null;
-	}
-
-	private static Move gameApiOperationToIsolaMove(List<Operation> lastMove) {
-		for(int i = 0; i < lastMove.size(); i++){
-			Set set = (Set)lastMove.get(i);
-			if(set.getKey() == MOVE){
-				String moveStr = (String)set.getValue(); // eg. "11, 22"
-				String[] move = moveStr.split("\\s*(=>|,|\\s)\\s*");
-				Position from = strToPosition(move[0]);
-				Position to = strToPosition(move[1]);
-				Move lastmove = new Move(from, to);
-				return lastmove;
-			}
-		}
-		return null;
-	}
-	
 	
 	private static boolean is_End_Game(IsolaState laststate, List<Operation> lastmove) {
 		Color turn = laststate.getTurn();
 		int id = (turn == Color.R)? rId : gId;
-		EndGame endgame = null;
-		if(lastmove.size() == 4){
-			endgame = (EndGame)lastmove.get(3);
-		
-		
-			if(endgame != null && endgame.getPlayerIdToScore().get(Integer.toString(id)) == 1){
+		for(Operation operation : lastmove){
+			if(operation instanceof EndGame){
+				EndGame endgame = (EndGame)operation;
 				Position position = laststate.getPlayerPosition(turn.getOppositeColor());
 				if(laststate.can_move(position))
 					return false;
+				
 			}
-		
 		}
 		
 		return true;
@@ -171,5 +174,41 @@ public class IsolaLogic {
 		return state;
 		
 	}
+	
+	
+	 static List<Operation> getMoveInitial(List<Integer> playerIds) {
+		    int redPlayerId = playerIds.get(0);
+		    int greenPlayerId = playerIds.get(1);
+		    List<Operation> operations = Lists.newArrayList();
+		    
+		    // set turn
+		    operations.add(new SetTurn(redPlayerId));
+		    
+		    // set initial board pieces
+		    for (int row = 0; row < 7; row++)
+		    	for (int column = 0; column < 7; column++){
+		    		if(row == 0 && column == 3){//red piece
+		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), Color.R));
+		    		}
+		    		else if(row == 6 && column == 3){//green piece
+		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), Color.G));
+		    		}
+		    		else //white piece
+		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), Color.W));
+		    	}
+		  
+		    return operations;
+		  }
+
+	
+	 private static void check(boolean val, Object... debugArguments) {
+		    if (!val) {
+		      throw new RuntimeException("We have a hacker! debugArguments="
+		          + Arrays.toString(debugArguments));
+		    }
+		  }
+	
+	
+	
 
 }

@@ -14,8 +14,7 @@ public class IsolaState {
 	private Piece[][] board = new Piece[7][7];
 	private Color turn;
 	private final List<Integer> playerIds;
-		
-	public IsolaState( Color turn, ArrayList<String> boardStr, List<Integer> playerIds){
+	public IsolaState(Color turn, ArrayList<String> boardStr, List<Integer> playerIds){
 		this.turn = turn;
 		this.playerIds = playerIds;
 		for(int i = 0; i < 7; i++){ // row
@@ -34,7 +33,6 @@ public class IsolaState {
 				case '-':
 					this.board[i][j] = new Piece(i, j, W);
 					break;
-					
 				}
 				
 			}
@@ -108,5 +106,10 @@ public class IsolaState {
 		}
 		return false;
 	}
+	
+	public boolean can_move(Color turn){
+		return can_move(getPlayerPosition(turn));
+	}
+
 
 }
