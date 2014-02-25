@@ -31,8 +31,8 @@ public class IsolaPresenter {
 	private static final String G = "G"; // green hand
 	private static final String W = "W";
 	private static final String B = "B";
-	private final int rId = 11;
-	private final int gId = 12;
+	private final static int rId = 11;
+	private final static int gId = 12;
 	
 	interface View {
 		   
@@ -47,9 +47,10 @@ public class IsolaPresenter {
 		     */
 		    void setPlayerState(Map<String, Object> gameApiState); //arguments expected
 		    void selectPiece(Color turn); //select red|green piece
-		    void selectMovePosition(List<Position> available_Move_Positions);
-		    void chooseDestroy(List<Position> available_Destroy_Positions);
-
+		  //  void selectMovePosition(List<Position> available_Move_Positions);
+		    void selectMovePosition(Position from);
+		  //  void chooseDestroy(List<Position> available_Destroy_Positions);
+		    void chooseDestroy();
 	}
 
 	private final IsolaLogic isolaLogic = new IsolaLogic();
@@ -74,7 +75,7 @@ public class IsolaPresenter {
 		//rId = 11   gId = 12
 		myColor = yourPlayerIndex == 0 ? Optional.of(Color.R)
 		        : yourPlayerIndex == 1 ? Optional.of(Color.G) : Optional.<Color>absent();
-		    
+		
 		if (updateUI.getState().isEmpty()) {
 			// The R player sends the initial setup move.
 			if (myColor.isPresent() && myColor.get().isRed()) {
@@ -82,14 +83,8 @@ public class IsolaPresenter {
 			}
 			return;
 		}
-		Color turnOfColor = null;
-		for (Operation operation : updateUI.getLastMove()) {
-			if (operation instanceof SetTurn) {
-				turnOfColor = Color.values()[playerIds.indexOf(((SetTurn) operation).getPlayerId())]; //get turn ID?
-			}
-		}
-		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(), playerIds, turnOfColor);
-
+		
+		
 		if (updateUI.isViewer()) {
 			view.setViewerState(updateUI.getState());
 			return;
@@ -99,6 +94,16 @@ public class IsolaPresenter {
 			// container.sendMakeMove(..);
 			return;
 		}
+		
+		Color turnOfColor = null;
+		for (Operation operation : updateUI.getLastMove()) {
+			if (operation instanceof SetTurn) {
+				turnOfColor = Color.values()[playerIds.indexOf(((SetTurn) operation).getPlayerId())]; //get turn ID?
+			}
+		}
+		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(), playerIds, turnOfColor);
+
+		
 		// Must be a player!
 		Color myC = myColor.get();
 		
@@ -118,13 +123,15 @@ public class IsolaPresenter {
 	void pieceSelected(Position position){
 		check(isMyTurn());
 		from = position;
-		view.selectMovePosition(get_available_Move_Positions(isolaState, from));
+	//	view.selectMovePosition(get_available_Move_Positions(isolaState, from));
+		view.selectMovePosition(from);
 	}
 	
 	void movePositionSelected(Position position){
 		check(isMyTurn());
 		to = position;
-		view.chooseDestroy(get_available_Destroy_Positions(isolaState));
+	//	view.chooseDestroy(get_available_Destroy_Positions(isolaState));
+		view.chooseDestroy();
 	}
 	
 	void destroyPositionSelected(Position position){
@@ -134,7 +141,12 @@ public class IsolaPresenter {
 	
 
 	private void makeMyMove(Position from, Position to, Position destroy) {
-		Color myC = isolaState.getTurn();
+		List<Operation> operations = getOperations(isolaState, from, to, destroy);
+		container.sendMakeMove(operations);
+	}
+
+	public static List<Operation> getOperations(IsolaState state, Position from, Position to, Position destroy) {
+		Color myC = state.getTurn();
 		Color opponent = myC.getOppositeColor();
 		
 		/**
@@ -147,19 +159,19 @@ public class IsolaPresenter {
 		List<Operation> operations = Lists.newArrayList();
 		operations.add(new SetTurn(opponent == Color.R ? rId : gId));
 		operations.add(new Set(position_To_Str(from), W));
-		operations.add(new Set(position_To_Str(to), myC));
+		operations.add(new Set(position_To_Str(to), (myC == Color.R? R : G)));
 		operations.add(new Set(position_To_Str(destroy), B));
-		if(!isolaState.can_move(opponent)){
+		if(!state.can_move(opponent)){
 			operations.add(new EndGame(myC == Color.R ? rId : gId));
 		}
-		container.sendMakeMove(operations);
+		return operations;
 	}
 
-	private String position_To_Str(Position position) {
+	private static String position_To_Str(Position position) {
 		return Integer.toString(position.getRow()) + Integer.toString(position.getColumn());
 	}
 
-	private List<Position> get_available_Destroy_Positions(
+	public List<Position> get_available_Destroy_Positions(
 			IsolaState isolaState) {
 		List<Position> positions = Lists.newArrayList();
 		Position tmp = new Position();
@@ -172,7 +184,7 @@ public class IsolaPresenter {
 		return positions;
 	}
 
-	private List<Position> get_available_Move_Positions(IsolaState isolaState, Position from) {
+	public static List<Position> get_available_Move_Positions(IsolaState isolaState, Position from) {
 		List<Position> positions = Lists.newArrayList();
 		Position myPosition = from;
 		
