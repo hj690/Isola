@@ -5,37 +5,35 @@ import static org.isola.client.Color.W;
 public class Piece {
 	private Color color;
 	private Position position;
-	
-	public Piece(int row, int column){
+
+	public Piece(int row, int column) {
 		this.position = new Position(row, column);
 		color = W;
 	}
-	
-	public Piece(int row, int column, Color color){
+
+	public Piece(int row, int column, Color color) {
 		this.position = new Position(row, column);
 		this.color = color;
 	}
-	
-	public void setColor(Color color){
+
+	public void setColor(Color color) {
 		this.color = color;
 	}
-	
-	public Color getColor(){
+
+	public Color getColor() {
 		return this.color;
 	}
-	
-	public Position getPosition(){
+
+	public Position getPosition() {
 		return this.position;
 	}
-	
-	public int getRow(){
+
+	public int getRow() {
 		return this.position.getRow();
 	}
-	
-	public int getColumn(){
+
+	public int getColumn() {
 		return this.position.getColumn();
 	}
-
-	
 
 }

@@ -178,7 +178,7 @@ public final class GameApi {
       return yourPlayerId == AI_PLAYER_ID;
     }
 
-    public boolean isViewer() {
+		public boolean isViewer() {
       return yourPlayerId == VIEWER_ID;
     }
 

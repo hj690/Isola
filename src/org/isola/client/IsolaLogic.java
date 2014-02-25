@@ -172,7 +172,8 @@ public class IsolaLogic {
 	}
 
 	@SuppressWarnings("unchecked")
-	static IsolaState gameApiStateToIsolatState(Map<String, Object> gameApiState, List<Integer> playerIds, Color turn) {
+	static IsolaState gameApiStateToIsolatState(
+			Map<String, Object> gameApiState, List<Integer> playerIds, Color turn) {
 //		String turnStr = (String)gameApiState.get(TURN);
 //		Color turn = (turnStr == R)? Color.R : Color.G;
 		ArrayList<String> boardStr = new ArrayList<String>();
