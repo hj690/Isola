@@ -1,12 +1,14 @@
 package org.isola.client;
 
 import java.util.List;
+import java.util.Map;
 
 import org.isola.client.Color;
 import org.isola.client.GameApi.Container;
 import org.isola.client.GameApi.Operation;
 import org.isola.client.GameApi.Set;
 import org.isola.client.GameApi.SetTurn;
+import org.isola.client.GameApi.EndGame;
 import org.isola.client.GameApi.UpdateUI;
 
 import com.google.common.base.Optional;
@@ -25,21 +27,27 @@ import com.google.common.collect.Lists;
 public class IsolaPresenter {
 
 	enum IsolaMessage {MOVE, DESTROY;}
+	private static final String R = "R"; // red hand
+	private static final String G = "G"; // green hand
+	private static final String W = "W";
+	private static final String B = "B";
+	private final int rId = 11;
+	private final int gId = 12;
 	
 	interface View {
 		   
 		    void setPresenter(IsolaPresenter isolaPresenter);
 
 		    /** Sets the state for a viewer, i.e., not one of the players. */
-		    void setViewerState(IsolaState isolastate); //arguements expected
+		    void setViewerState(Map<String, Object> gameApiState); //arguements expected
 
 		    /**
 		     * Sets the state for a player (whether the player has the turn or not).
 		     * The "declare cheater" button should be enabled only for CheaterMessage.IS_OPPONENT_CHEATING.
 		     */
-		    void setPlayerState(IsolaState isolastate);//arguments expected
-
-		    void chooseMove(List<Position> available_Move_Positions);
+		    void setPlayerState(Map<String, Object> gameApiState); //arguments expected
+		    void selectPiece(Color turn); //select red|green piece
+		    void selectMovePosition(List<Position> available_Move_Positions);
 		    void chooseDestroy(List<Position> available_Destroy_Positions);
 
 	}
@@ -55,6 +63,7 @@ public class IsolaPresenter {
 		this.container = container;
 		view.setPresenter(this);
 	}
+	private Position from, to, destroy;
 	
 	/** Updates the presenter and the view with the state in updateUI. */
 	public void updateUI(UpdateUI updateUI) {
@@ -79,10 +88,10 @@ public class IsolaPresenter {
 				turnOfColor = Color.values()[playerIds.indexOf(((SetTurn) operation).getPlayerId())]; //get turn ID?
 			}
 		}
-		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(), playerIds);
+		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(), playerIds, turnOfColor);
 
 		if (updateUI.isViewer()) {
-			view.setViewerState(isolaState);
+			view.setViewerState(updateUI.getState());
 			return;
 		}
 		if (updateUI.isAiPlayer()) {
@@ -92,21 +101,63 @@ public class IsolaPresenter {
 		}
 		// Must be a player!
 		Color myC = myColor.get();
-		Color opponent = myC.getOppositeColor();
 		
-		view.setPlayerState(isolaState);
+		view.setPlayerState(updateUI.getState());
 		
 		if (isMyTurn()) {
-			if (isolaState.can_move(myC)) {
-				view.chooseMove(get_available_Move_Positions(isolaState, myC));
-				view.chooseDestroy(get_available_Destroy_Positions(isolaState));
-			} 
-			else {// endGame
-				endGame();
-			}
+			if (isolaState.can_move(myC)) //make sure my piece can move
+				view.selectPiece(myC);
 		}
 	}
 	
+	private void check(boolean val) {
+		if (!val) 
+				throw new IllegalArgumentException();
+	}
+		  
+	void pieceSelected(Position position){
+		check(isMyTurn());
+		from = position;
+		view.selectMovePosition(get_available_Move_Positions(isolaState, from));
+	}
+	
+	void movePositionSelected(Position position){
+		check(isMyTurn());
+		to = position;
+		view.chooseDestroy(get_available_Destroy_Positions(isolaState));
+	}
+	
+	void destroyPositionSelected(Position position){
+		destroy = position;
+		makeMyMove(from, to, destroy);
+	}
+	
+
+	private void makeMyMove(Position from, Position to, Position destroy) {
+		Color myC = isolaState.getTurn();
+		Color opponent = myC.getOppositeColor();
+		
+		/**
+		 * operation order: SetTurn, 
+		 *                  set(fromPosition, W),
+		 *                  set(toPosition, turn),
+		 *                  set(destroyPosition, B),
+		 *        (optional)EndGame(playerId).
+		 */
+		List<Operation> operations = Lists.newArrayList();
+		operations.add(new SetTurn(opponent == Color.R ? rId : gId));
+		operations.add(new Set(position_To_Str(from), W));
+		operations.add(new Set(position_To_Str(to), myC));
+		operations.add(new Set(position_To_Str(destroy), B));
+		if(!isolaState.can_move(opponent)){
+			operations.add(new EndGame(myC == Color.R ? rId : gId));
+		}
+		container.sendMakeMove(operations);
+	}
+
+	private String position_To_Str(Position position) {
+		return Integer.toString(position.getRow()) + Integer.toString(position.getColumn());
+	}
 
 	private List<Position> get_available_Destroy_Positions(
 			IsolaState isolaState) {
@@ -121,9 +172,9 @@ public class IsolaPresenter {
 		return positions;
 	}
 
-	private List<Position> get_available_Move_Positions(IsolaState isolaState, Color myC) {
+	private List<Position> get_available_Move_Positions(IsolaState isolaState, Position from) {
 		List<Position> positions = Lists.newArrayList();
-		Position myPosition = isolaState.getPlayerPosition(myC);
+		Position myPosition = from;
 		
 		Position tmp = new Position(myPosition.getRow() - 1, myPosition.getColumn()); //up
 		if(tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
@@ -168,13 +219,6 @@ public class IsolaPresenter {
 	private void sendInitialMove(List<Integer> playerIds) {
 		container.sendMakeMove(isolaLogic.getMoveInitial(playerIds));
 	}
-	
-	
-	private void endGame() {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	
 
 }

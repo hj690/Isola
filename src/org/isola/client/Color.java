@@ -1,8 +1,9 @@
 package org.isola.client;
 
 public enum Color {
-	W, B, // available and unavailable piece
-	R, G; // red player and green player
+	R, G, // red player and green player
+	W, B; // available and unavailable piece
+	
 	public boolean isWhite(){
 		return this == W;
 	}

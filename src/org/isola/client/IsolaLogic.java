@@ -31,6 +31,8 @@ public class IsolaLogic {
 												// or G)
 	private static final String R = "R"; // red hand
 	private static final String G = "G"; // green hand
+	private static final String W = "W"; // red hand
+	private static final String B = "B"; // green hand
 	private static final String MOVE = "move";
 	private static final String DESTROY = "destroy";
 	private final static int rId = 11;
@@ -60,12 +62,8 @@ public class IsolaLogic {
 		    }
 		  }
 	
-	
-	
-	
 	 @SuppressWarnings("unchecked")
-	static
-	  List<Operation> getExpectedOperations(VerifyMove verifyMove) {
+	static List<Operation> getExpectedOperations(VerifyMove verifyMove) {
 	    List<Operation> lastMove = verifyMove.getLastMove();
 	    Map<String, Object> lastApiState = verifyMove.getLastState();
 	    List<Integer> playerIds = verifyMove.getPlayerIds();
@@ -74,53 +72,80 @@ public class IsolaLogic {
 	    }
 	    
 	    int lastMovePlayerId = verifyMove.getLastMovePlayerId();
-	    IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState(), verifyMove.getPlayerIds());
-		
+	    IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState(), verifyMove.getPlayerIds(), 
+	    		Color.values()[playerIds.indexOf(lastMovePlayerId)]);
 	    
-	    List<Position> positions = Lists.newArrayList();
+	    /**
+	     * positions:{from, to, destroy}
+	     */
+	    List<Position> positions = Lists.newArrayList(); 
 	    for(Operation operation : lastMove){
-	    	if(operation instanceof Set){//move
+	    	if(operation instanceof Set){
 	    		Set set = (Set) operation;
 	    		positions.add(strToPosition(set.getKey()));
 	    	}
-	    	else if(operation instanceof Delete){
-	    		Delete delete = (Delete) operation;
-	    		positions.add(strToPosition(delete.getKey()));
-	    	}
 	    }
 	    
+	    check(positions.size() == 3); // should be 3 positions: from, to, destroy
+	    Position from = positions.get(0);
+	    Position to = positions.get(1);
+	    Position destroy = positions.get(2);
 	    
-	    if(positions.size() == 2){//move operation
-	    	Position to = positions.get(0);
-	    	Position from = positions.get(1);
+	    
+	    /**
+	     * check the operatiosns count is 4 or 5
+	     */
+	    
+	    check(lastMove.size() == 4 || lastMove.size() == 5);
+	    
+	    /**
+	     * check move is legal
+	     */
 	    	
-	    	//if move the right piece
-			Color turn = laststate.getTurn();
-			check(laststate.getPieceColor(from) == turn);
+	    //if move the right piece
+		Color turn = laststate.getTurn();
+		check(laststate.getPieceColor(from) == turn);
 			
-			//if from position ok
-			check(from.is_in_board());
+		//if from position ok
+		check(from.is_in_board());
 			
-			//is move to neighbor?
-			check(move_to_neighbor(from, to));
+		//is move to neighbor?
+		check(move_to_neighbor(from, to));
 			
-			//if to position ok
-			check(laststate.getPieceColor(to) == W);
-	    }
-	    	
+		//if to position blank
+		check(laststate.getPieceColor(to) == Color.W);
 	    
-	    else if(positions.size() == 1){// destroy operation
-	    	Position destroy = positions.get(0);
-	    	//if destroy position ok
-			check(destroy.is_in_board() && laststate.getPieceColor(destroy) == W);
-	    }
+		/**
+		 * make move
+		 */
+	 
+		check(((Set)lastMove.get(1)).getValue() == W);
+		laststate.setPieceColor(from, Color.W);
 		
-	    else{
-	    }
+		String turnStr = (String)((Set)lastMove.get(2)).getValue();
+		check(turnStr == R || turnStr == G);
+		check((turnStr == R ? Color.R:Color.G) == turn);
+		laststate.setPieceColor(to, turn);
 		
-		//if end game
-		check(is_End_Game(laststate, verifyMove.getLastMove()));
+		/**
+		 * check destroy position is legal
+		 */
+	 
+	    //if destroy position ok
+		check(destroy.is_in_board() && laststate.getPieceColor(destroy) == Color.W);
+	    
+		/**
+		 * make destroy
+		 */
+		laststate.setPieceColor(destroy, Color.B);
 		
+		/**
+		 * check if there is EndGame operation
+		 */
+		if(lastMove.size() == 5){
+			EndGame endgame = (EndGame)lastMove.get(4);
+			check(is_End_Game(laststate, endgame));
+		}
 		return verifyMove.getLastMove();
 	  }
 
@@ -133,19 +158,10 @@ public class IsolaLogic {
 		return false;
 	}
 	
-	private static boolean is_End_Game(IsolaState laststate, List<Operation> lastmove) {
+	private static boolean is_End_Game(IsolaState laststate, EndGame endgame) {
 		Color turn = laststate.getTurn();
-		int id = (turn == Color.R)? rId : gId;
-		for(Operation operation : lastmove){
-			if(operation instanceof EndGame){
-				EndGame endgame = (EndGame)operation;
-				Position position = laststate.getPlayerPosition(turn.getOppositeColor());
-				if(laststate.can_move(position))
-					return false;
-				
-			}
-		}
-		
+		Color opponet = turn.getOppositeColor();
+		check(!laststate.can_move(opponet));
 		return true;
 
 	}
@@ -156,9 +172,9 @@ public class IsolaLogic {
 	}
 
 	@SuppressWarnings("unchecked")
-	static IsolaState gameApiStateToIsolatState(Map<String, Object> gameApiState, List<Integer> playerIds) {
-		String turnStr = (String)gameApiState.get(TURN);
-		Color turn = (turnStr == R)? Color.R : Color.G;
+	static IsolaState gameApiStateToIsolatState(Map<String, Object> gameApiState, List<Integer> playerIds, Color turn) {
+//		String turnStr = (String)gameApiState.get(TURN);
+//		Color turn = (turnStr == R)? Color.R : Color.G;
 		ArrayList<String> boardStr = new ArrayList<String>();
 		boardStr.add((String)gameApiState.get("line0")); // line 0
 		boardStr.add((String)gameApiState.get("line1")); // line 1
@@ -175,7 +191,6 @@ public class IsolaLogic {
 		
 	}
 	
-	
 	 static List<Operation> getMoveInitial(List<Integer> playerIds) {
 		    int redPlayerId = playerIds.get(0);
 		    int greenPlayerId = playerIds.get(1);
@@ -188,13 +203,13 @@ public class IsolaLogic {
 		    for (int row = 0; row < 7; row++)
 		    	for (int column = 0; column < 7; column++){
 		    		if(row == 0 && column == 3){//red piece
-		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), Color.R));
+		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), R));
 		    		}
 		    		else if(row == 6 && column == 3){//green piece
-		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), Color.G));
+		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), G));
 		    		}
 		    		else //white piece
-		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), Color.W));
+		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), W));
 		    	}
 		  
 		    return operations;
