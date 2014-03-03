@@ -15,6 +15,7 @@ import org.isola.client.GameApi.VerifyMoveDone;
 import org.isola.client.Color;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,7 +38,6 @@ public class IsolaLogic {
 	private static final String DESTROY = "destroy";
 	private final static int rId = 11;
 	private final static int gId = 12;
-	
 	
 	
 	public static VerifyMoveDone verify(VerifyMove verifyMove) {
@@ -172,21 +172,9 @@ public class IsolaLogic {
 	}
 
 	@SuppressWarnings("unchecked")
-	static IsolaState gameApiStateToIsolatState(
-			Map<String, Object> gameApiState, List<Integer> playerIds, Color turn) {
-//		String turnStr = (String)gameApiState.get(TURN);
-//		Color turn = (turnStr == R)? Color.R : Color.G;
-		ArrayList<String> boardStr = new ArrayList<String>();
-		boardStr.add((String)gameApiState.get("line0")); // line 0
-		boardStr.add((String)gameApiState.get("line1")); // line 1
-		boardStr.add((String)gameApiState.get("line2")); // line 2
-		boardStr.add((String)gameApiState.get("line3")); // line 3
-		boardStr.add((String)gameApiState.get("line4")); // line 4
-		boardStr.add((String)gameApiState.get("line5")); // line 5
-		boardStr.add((String)gameApiState.get("line6")); // line 6
-	
-		IsolaState state = new IsolaState(turn , boardStr, playerIds);
+	static IsolaState gameApiStateToIsolatState( Map<String, Object> gameApiState, List<Integer> playerIds, Color turn) {
 		
+		IsolaState state = new IsolaState(turn , gameApiState, playerIds);
 		
 		return state;
 		
@@ -194,24 +182,11 @@ public class IsolaLogic {
 	
 	 static List<Operation> getMoveInitial(List<Integer> playerIds) {
 		    int redPlayerId = playerIds.get(0);
-		    int greenPlayerId = playerIds.get(1);
 		    List<Operation> operations = Lists.newArrayList();
 		    
-		    // set turn
 		    operations.add(new SetTurn(redPlayerId));
-		    
-		    // set initial board pieces
-		    for (int row = 0; row < 7; row++)
-		    	for (int column = 0; column < 7; column++){
-		    		if(row == 0 && column == 3){//red piece
-		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), R));
-		    		}
-		    		else if(row == 6 && column == 3){//green piece
-		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), G));
-		    		}
-		    		else //white piece
-		    			operations.add(new Set(Integer.toString(row)+Integer.toString(column), W));
-		    	}
+		    operations.add(new Set("03", R));
+		    operations.add(new Set("63", G));
 		  
 		    return operations;
 		  }

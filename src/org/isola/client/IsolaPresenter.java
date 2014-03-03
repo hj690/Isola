@@ -14,6 +14,7 @@ import org.isola.client.GameApi.UpdateUI;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.gwt.event.dom.client.ClickEvent;
 
 /**
  * The presenter that controls the cheat graphics. We use the MVP pattern: the
@@ -24,10 +25,6 @@ import com.google.common.collect.Lists;
 
 public class IsolaPresenter {
 
-	enum IsolaMessage {
-		MOVE, DESTROY;
-	}
-
 	private static final String R = "R"; // red hand
 	private static final String G = "G"; // green hand
 	private static final String W = "W";
@@ -35,29 +32,29 @@ public class IsolaPresenter {
 	private final static int rId = 11;
 	private final static int gId = 12;
 
-	interface View {
+	public interface View {
 
 		void setPresenter(IsolaPresenter isolaPresenter);
 
 		/** Sets the state for a viewer, i.e., not one of the players. */
-		void setViewerState(Map<String, Object> gameApiState); // arguements
-																// expected
+		void setViewerState(Map<String, Object> gameApiState); // arguements expected
 
-		/**
+		/** 
 		 * Sets the state for a player (whether the player has the turn or not).
 		 * The "declare cheater" button should be enabled only for
 		 * CheaterMessage.IS_OPPONENT_CHEATING.
 		 */
-		void setPlayerState(Map<String, Object> gameApiState); // arguments
-																// expected
+		void setPlayerState(Map<String, Object> gameApiState); // arguments expected
 
-		void selectPiece(Color turn); // select red|green piece
-		// void selectMovePosition(List<Position> available_Move_Positions);
+	//	void selectPiece(Color color, Position position); // select red|green piece
+		void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions);
 
-		void selectMovePosition(Position from);
+		//void selectMovePosition(Position from);
 
-		// void chooseDestroy(List<Position> available_Destroy_Positions);
-		void chooseDestroy();
+		void chooseDestroy(List<Position> available_Destroy_Positions);
+		//void chooseDestroy();
+
+		
 	}
 
 	private final IsolaLogic isolaLogic = new IsolaLogic();
@@ -81,10 +78,9 @@ public class IsolaPresenter {
 		int yourPlayerId = updateUI.getYourPlayerId();
 		int yourPlayerIndex = updateUI.getPlayerIndex(yourPlayerId);
 
-		// rId = 11 gId = 12
+		// get my color
 		myColor = yourPlayerIndex == 0 ? Optional.of(Color.R)
-				: yourPlayerIndex == 1 ? Optional.of(Color.G) : Optional
-						.<Color> absent();
+				: yourPlayerIndex == 1 ? Optional.of(Color.G) : Optional.<Color> absent();
 
 		if (updateUI.getState().isEmpty()) {
 			// The R player sends the initial setup move.
@@ -107,14 +103,11 @@ public class IsolaPresenter {
 		Color turnOfColor = null;
 		for (Operation operation : updateUI.getLastMove()) {
 			if (operation instanceof SetTurn) {
-				turnOfColor = Color.values()[playerIds
-						.indexOf(((SetTurn) operation).getPlayerId())]; // get
-																		// turn
-																		// ID?
+				turnOfColor = Color.values()[playerIds.indexOf(((SetTurn) operation).getPlayerId())];
 			}
 		}
-		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(),
-				playerIds, turnOfColor);
+		
+		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(), playerIds, turnOfColor);
 
 		// Must be a player!
 		Color myC = myColor.get();
@@ -122,8 +115,12 @@ public class IsolaPresenter {
 		view.setPlayerState(updateUI.getState());
 
 		if (isMyTurn()) {
-			if (isolaState.can_move(myC)) // make sure my piece can move
-				view.selectPiece(myC);
+			if (isolaState.can_move(myC)){
+				from = isolaState.getPlayerPosition(myC);
+				view.selectMovePosition(turnOfColor, from, get_available_Move_Positions());
+			}
+				
+			
 		}
 	}
 
@@ -132,22 +129,29 @@ public class IsolaPresenter {
 			throw new IllegalArgumentException();
 	}
 
-	void pieceSelected(Position position) {
-		check(isMyTurn());
-		from = position;
-		// view.selectMovePosition(get_available_Move_Positions(isolaState,
-		// from));
-		view.selectMovePosition(from);
-	}
+//	public void pieceSelected(Position position) {
+//		check(isMyTurn());
+//		from = position;
+//		view.selectMovePosition(get_available_Move_Positions(isolaState,from));
+//		//view.selectMovePosition(from);
+//	}
 
-	void movePositionSelected(Position position) {
+	public void movePositionSelected(Position position) {
+		System.out.println("movePositionSelected" + position.getRow() + position.getColumn());
 		check(isMyTurn());
 		to = position;
-		// view.chooseDestroy(get_available_Destroy_Positions(isolaState));
-		view.chooseDestroy();
+		upDateState(from, to);
+		view.chooseDestroy(get_available_Destroy_Positions());
+		//view.chooseDestroy();
 	}
 
-	void destroyPositionSelected(Position position) {
+	private void upDateState(Position from, Position to) {
+		isolaState.setPieceColor(to, isolaState.getPieceColor(from));
+		isolaState.setPieceColor(from, Color.W);
+	
+}
+
+	public void destroyPositionSelected(Position position) {
 		destroy = position;
 		makeMyMove(from, to, destroy);
 	}
@@ -158,8 +162,7 @@ public class IsolaPresenter {
 		container.sendMakeMove(operations);
 	}
 
-	public static List<Operation> getOperations(IsolaState state,
-			Position from, Position to, Position destroy) {
+	public static List<Operation> getOperations(IsolaState state, Position from, Position to, Position destroy) {
 		Color myC = state.getTurn();
 		Color opponent = myC.getOppositeColor();
 
@@ -183,7 +186,7 @@ public class IsolaPresenter {
 				+ Integer.toString(position.getColumn());
 	}
 
-	public List<Position> get_available_Destroy_Positions(IsolaState isolaState) {
+	public List<Position> get_available_Destroy_Positions() {
 		List<Position> positions = Lists.newArrayList();
 		Position tmp = new Position();
 		for (int i = 0; i < 7; i++)
@@ -195,45 +198,40 @@ public class IsolaPresenter {
 		return positions;
 	}
 
-	public static List<Position> get_available_Move_Positions(
-			IsolaState isolaState, Position from) {
+	public List<Position> get_available_Move_Positions() {
 		List<Position> positions = Lists.newArrayList();
-		Position myPosition = from;
+		int row = from.getRow();
+		int col = from.getColumn();
 
-		Position tmp = new Position(myPosition.getRow() - 1,
-				myPosition.getColumn()); // up
+		Position tmp = new Position(row - 1, col); // up
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow() - 1, myPosition.getColumn() + 1); // up
-																					// right
+		tmp = new Position(row - 1, col + 1); // up right
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow(), myPosition.getColumn() + 1); // right
+		tmp = new Position(row, col + 1); // right
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow() + 1, myPosition.getColumn() + 1); // righ
-																					// down
+		tmp = new Position(row + 1, col + 1); // right down
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow() + 1, myPosition.getColumn()); // down
+		tmp = new Position(row + 1, col); // down
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow() + 1, myPosition.getColumn() - 1); // left
-																					// down
+		tmp = new Position(row + 1, col - 1); // left down
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow(), myPosition.getColumn() - 1); // left
+		tmp = new Position(row, col - 1); // left
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 
-		tmp = new Position(myPosition.getRow() - 1, myPosition.getColumn() - 1); // up
-																					// left
+		tmp = new Position(row - 1, col - 1); // up left
 		if (tmp.is_in_board() && isolaState.getPieceColor(tmp) == Color.W)
 			positions.add(tmp);
 

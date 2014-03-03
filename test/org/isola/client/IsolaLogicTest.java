@@ -78,13 +78,15 @@ public class IsolaLogicTest {
 	public void test_red_move_rightDown() {
 		// last state
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "---R---").put("line1", "-------")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "-------").put("line5", "-------")
-				.put("line6", "---G---").build();
+				.put("03", R)
+				.put("63", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("03", W), new Set("14", R), new Set("11", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("03", W), 
+				new Set("14", R), 
+				new Set("11", B));
 
 		assertMoveOk(move(rId, state, operations));
 	}
@@ -92,13 +94,15 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_move_upleft() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "---R---").put("line1", "-------")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "-------").put("line5", "-------")
-				.put("line6", "---G---").build();
+				.put("03", R)
+				.put("63", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("63", W), new Set("52", G), new Set("11", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId), 
+				new Set("63", W), 
+				new Set("52", G), 
+				new Set("11", B));
 
 		assertMoveOk(move(gId, state, operations));
 	}
@@ -106,13 +110,19 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_move_right() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "------R").put("line1", "---X-X-")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "---X---").put("line5", "---XX--")
-				.put("line6", "-----G-").build();
+				.put("06", R)
+				.put("13", B)
+				.put("15", B)
+				.put("43", B)
+				.put("53", B)
+				.put("65", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("65", W), new Set("66", G), new Set("11", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId), 
+				new Set("65", W), 
+				new Set("66", G), 
+				new Set("11", B));
 
 		assertMoveOk(move(gId, state, operations));
 	}
@@ -120,13 +130,19 @@ public class IsolaLogicTest {
 	@Test
 	public void test_red_move_left() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "X-----R").put("line1", "---X-X-")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "---X---").put("line5", "---XX--")
-				.put("line6", "------G").build();
+				.put("06", R)
+				.put("13", B)
+				.put("15", B)
+				.put("43", B)
+				.put("53", B)
+				.put("66", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("06", W), new Set("05", R), new Set("11", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId),
+				new Set("06", W), 
+				new Set("05", R), 
+				new Set("11", B));
 
 		assertMoveOk(move(rId, state, operations));
 	}
@@ -134,13 +150,19 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_destroy() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "------R").put("line1", "---X-X-")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "---X---").put("line5", "---XX--")
-				.put("line6", "G------").build();
+				.put("06", R)
+				.put("13", B)
+				.put("15", B)
+				.put("43", B)
+				.put("53", B)
+				.put("60", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("60", W), new Set("61", G), new Set("00", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId),
+				new Set("60", W), 
+				new Set("61", G), 
+				new Set("00", B));
 
 		assertMoveOk(move(gId, state, operations));
 	}
@@ -150,13 +172,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_move_left_destroyed() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "------R").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "---X---").put("line5", "---X---")
-				.put("line6", "-----XG").build();
+				.put("06", R)
+				.put("65", B)
+				.put("66", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("66", W), new Set("65", G), new Set("33", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId), 
+				new Set("66", W), 
+				new Set("65", G), 
+				new Set("33", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -164,13 +189,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_move_outboard() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "------R").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "-------")
-				.put("line4", "---X---").put("line5", "---X---")
-				.put("line6", "-----XG").build();
+				.put("06", R)
+				.put("65", B)
+				.put("66", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("66", W), new Set("67", G), new Set("33", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("66", W), 
+				new Set("67", G), 
+				new Set("33", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -178,13 +206,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_red_move_outboard() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "----X-X")
-				.put("line2", "-X-----").put("line3", "---X---")
-				.put("line4", "---X---").put("line5", "-------")
-				.put("line6", "R----XG").build();
+				.put("60", R)
+				.put("65", B)
+				.put("66", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("60", W), new Set("70", R), new Set("11", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("60", W), 
+				new Set("70", R), 
+				new Set("11", B));
 
 		assertHacker(move(rId, state, operations));
 	}
@@ -192,13 +223,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_red_move_toofar() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "R------").put("line1", "----X-X")
-				.put("line2", "-X-----").put("line3", "---X---")
-				.put("line4", "---X---").put("line5", "-------")
-				.put("line6", "-----XG").build();
+				.put("00", R)
+				.put("65", B)
+				.put("66", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("00", W), new Set("02", R), new Set("63", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("00", W), 
+				new Set("02", R), 
+				new Set("63", B));
 
 		assertHacker(move(rId, state, operations));
 	}
@@ -206,13 +240,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_move_occupied() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "---R---")
-				.put("line4", "---G---").put("line5", "---X---")
-				.put("line6", "-----XX").build();
+				.put("33", R)
+				.put("65", B)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new Set("43",
-				W), new Set("33", G), new Set("23", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId),
+				new Set("43", W), 
+				new Set("33", G), 
+				new Set("23", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -220,13 +257,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_move_down_destroyed() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "---R---")
-				.put("line4", "---G---").put("line5", "---X---")
-				.put("line6", "-----XX").build();
+				.put("33", R)
+				.put("53", B)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new Set("43",
-				G), new Set("53", W), new Set("00", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId),
+				new Set("43", W),
+				new Set("53", G), 
+				new Set("00", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -234,13 +274,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_red_destroy_outboard() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "R------").put("line1", "----X-X")
-				.put("line2", "-X-----").put("line3", "---X---")
-				.put("line4", "---X---").put("line5", "-------")
-				.put("line6", "-----XG").build();
+				.put("00", R)
+				.put("53", B)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("00", W), new Set("01", R), new Set("67", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("00", W), 
+				new Set("01", R), 
+				new Set("67", B));
 
 		assertHacker(move(rId, state, operations));
 	}
@@ -248,13 +291,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_destroy_destroyed() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "---R---")
-				.put("line4", "---G---").put("line5", "---X---")
-				.put("line6", "-----XX").build();
+				.put("66", B)
+				.put("53", R)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("43", W), new Set("44", G), new Set("66", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId), 
+				new Set("43", W), 
+				new Set("44", G), 
+				new Set("66", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -262,13 +308,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_destroy_occupied() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "---R---")
-				.put("line4", "---G---").put("line5", "---X---")
-				.put("line6", "-----XX").build();
+				.put("66", B)
+				.put("33", R)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("43", W), new Set("44", G), new Set("33", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId), 
+				new Set("43", W), 
+				new Set("44", G), 
+				new Set("33", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -276,13 +325,16 @@ public class IsolaLogicTest {
 	@Test
 	public void test_green_destroy_self() {
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "----X-X")
-				.put("line2", "-------").put("line3", "---R---")
-				.put("line4", "---G---").put("line5", "---X---")
-				.put("line6", "-----XX").build();
+				.put("66", B)
+				.put("33", R)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("43", W), new Set("44", G), new Set("44", B));
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("43", W), 
+				new Set("44", G), 
+				new Set("44", B));
 
 		assertHacker(move(gId, state, operations));
 	}
@@ -291,13 +343,19 @@ public class IsolaLogicTest {
 	@Test
 	public void test_endgame_green_win() { // this is legal
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "-------")
-				.put("line2", "X------").put("line3", "RX-----")
-				.put("line4", "XX-G---").put("line5", "----X--")
-				.put("line6", "-------").build();
+				.put("20", B)
+				.put("31", B)
+				.put("40", B)
+				.put("41", B)
+				.put("30", R)
+				.put("43", G)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				rId), new Set("43", W), new Set("44", G), new Set("21", B),
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(rId), 
+				new Set("43", W), 
+				new Set("44", G), 
+				new Set("21", B),
 				new EndGame(gId));
 
 		assertMoveOk(move(gId, state, operations));
@@ -306,13 +364,19 @@ public class IsolaLogicTest {
 	@Test
 	public void test_endgame_red_win() { // this is illegal
 		Map<String, Object> state = ImmutableMap.<String, Object> builder()
-				.put("line0", "-------").put("line1", "-------")
-				.put("line2", "X---R--").put("line3", "GX-----")
-				.put("line4", "XX-----").put("line5", "-X--X--")
-				.put("line6", "-------").build();
+				.put("20", B)
+				.put("31", B)
+				.put("40", B)
+				.put("41", B)
+				.put("30", G)
+				.put("43", R)
+				.build();
 
-		List<Operation> operations = ImmutableList.<Operation> of(new SetTurn(
-				gId), new Set("24", W), new Set("23", R), new Set("22", B),
+		List<Operation> operations = ImmutableList.<Operation> of(
+				new SetTurn(gId), 
+				new Set("24", W), 
+				new Set("23", R), 
+				new Set("22", B),
 				new EndGame(rId));
 
 		assertHacker(move(rId, state, operations));

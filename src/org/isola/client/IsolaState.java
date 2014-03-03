@@ -6,7 +6,12 @@ import static org.isola.client.Color.W;
 import static org.isola.client.Color.B;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
@@ -15,30 +20,43 @@ public class IsolaState {
 	private Color turn;
 	private final List<Integer> playerIds;
 
-	public IsolaState(Color turn, ArrayList<String> boardStr,
-			List<Integer> playerIds) {
+	
+	public IsolaState(Color turn, Map<String, Object> gameApiState, List<Integer> playerIds) {
 		this.turn = turn;
 		this.playerIds = playerIds;
 		for (int i = 0; i < 7; i++) { // row
-			String line = boardStr.get(i);
 			for (int j = 0; j < 7; j++) { // column
-				switch (line.charAt(j)) {
-				case 'R':
-					this.board[i][j] = new Piece(i, j, R);
-					break;
-				case 'G':
-					this.board[i][j] = new Piece(i, j, G);
-					break;
-				case 'X':
-					this.board[i][j] = new Piece(i, j, B);
-					break;
-				case '-':
 					this.board[i][j] = new Piece(i, j, W);
-					break;
 				}
-
 			}
+		Iterator it = gameApiState.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry entry = (Map.Entry) it.next(); 
+			String pos = (String)entry.getKey();
+			String color = (String)entry.getValue();
+			int posInt = Integer.parseInt(pos);
+			Position p = new Position((posInt - posInt%10)/10, posInt%10);
+			Color c = Color.W;
+			switch (color){
+			case "R":
+				c = Color.R;
+				break;
+			case "G":
+				c = Color.G;
+				break;
+			case "B":
+				c = Color.B;
+				break;
+			case "W":
+				c = Color.W;
+				break;
+			default:
+				break;
+			}
+			this.board[p.getRow()][p.getColumn()] = new Piece(p.getRow(), p.getColumn(), c);
+			
 		}
+		
 
 	}
 
@@ -54,6 +72,14 @@ public class IsolaState {
 		return board;
 	}
 
+	public Piece getPiece(int row, int column){
+		return this.board[row][column];
+	}
+	
+	public Piece getPiece(Position position){
+		return getPiece(position.getRow(), position.getColumn());
+	}
+	
 	public void setPieceColor(int row, int column, Color color) {
 		this.board[row][column].setColor(color);
 	}
