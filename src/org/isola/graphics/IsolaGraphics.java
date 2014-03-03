@@ -56,6 +56,9 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		  initializeGrid();
 	  }
 	  
+	  /**
+	   * initialize the Grid
+	   */
 	  private void initializeGrid() {
 		  gameGrid.setPixelSize(420, 420);
 		  gameGrid.resize(7, 7);
@@ -187,7 +190,12 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		
 	}
 
-	//set from position turn color, set to position white color
+	/**
+	 * update UI images for moving action
+	 * @param from
+	 * @param to
+	 * @param turn
+	 */
 	protected void makeMoveUpdate(Position from, Position to, Color turn) {
 		System.out.println("makeMoveUpdate: ");
 		System.out.println("from " + from.getRow() + from.getColumn() + "to " + to.getRow() + to.getColumn() + "turn " + turn.toString());
@@ -236,6 +244,10 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		
 	}
 
+	/**
+	 * update Ui Piece images for destroying action
+	 * @param destroy
+	 */
 	protected void destroyUpdate(Position destroy) {
 		System.out.println("destroy " + destroy.getRow() + destroy.getColumn());
 		int row = destroy.getRow();
