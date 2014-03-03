@@ -35,7 +35,6 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  
 	  @UiField
 	  Grid gameGrid = new Grid();
-	  
 	 
 	  private boolean enableClicks = false;
 	  private final PieceImageSupplier pieceImageSupplier;
@@ -92,7 +91,6 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 				  myPanel[i][j].add(new Image(pieceImageSupplier.getResource(myPieces[i][j])));
 				  gameGrid.setWidget(i, j, myPanel[i][j]);
 			  }
-	
 	  }
 	  
 	  @Override

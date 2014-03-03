@@ -41,4 +41,5 @@ public class PieceImageSupplier {
 	private ImageResource getBlackPiece() {
 		return pieceImages.black();
 	}
+	
 }

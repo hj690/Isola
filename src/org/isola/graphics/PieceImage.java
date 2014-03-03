@@ -3,7 +3,6 @@ package org.isola.graphics;
 import org.isola.client.Color;
 import org.isola.client.Position;
 
-
 /**
  * A representation of a piece image.
  */

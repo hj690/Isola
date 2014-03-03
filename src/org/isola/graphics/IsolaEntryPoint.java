@@ -23,6 +23,7 @@ public class IsolaEntryPoint implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		Game game = new Game() {
+			
 			@Override
 			public void sendVerifyMove(VerifyMove verifyMove) {
 				container.sendVerifyMoveDone(new IsolaLogic().verify(verifyMove));
@@ -33,6 +34,7 @@ public class IsolaEntryPoint implements EntryPoint {
 				isolaPresenter.updateUI(updateUI);
 			}
 		};
+		
 		container = new IteratingPlayerContainer(game, 2);
 		IsolaGraphics isolaGraphics = new IsolaGraphics();
 		isolaPresenter = new IsolaPresenter(isolaGraphics, container);

@@ -4,7 +4,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
 public interface PieceImages extends ClientBundle{
-
+	
 	  @Source("images/pieces/green.gif")
 	  ImageResource green();
 
@@ -16,4 +16,5 @@ public interface PieceImages extends ClientBundle{
 	  
 	  @Source("images/pieces/white.jpg")
 	  ImageResource white();
+	  
 }
