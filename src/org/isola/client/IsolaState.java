@@ -18,10 +18,10 @@ import com.google.common.collect.ImmutableList;
 public class IsolaState {
 	private Piece[][] board = new Piece[7][7];
 	private Color turn;
-	private final List<Integer> playerIds;
+	private final List<String> playerIds;
 
 	
-	public IsolaState(Color turn, Map<String, Object> gameApiState, List<Integer> playerIds) {
+	public IsolaState(Color turn, Map<String, Object> gameApiState, List<String> playerIds) {
 		this.turn = turn;
 		this.playerIds = playerIds;
 		for (int i = 0; i < 7; i++) { // row

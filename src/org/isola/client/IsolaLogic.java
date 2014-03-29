@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.isola.client.GameApi.Delete;
-import org.isola.client.GameApi.EndGame;
-import org.isola.client.GameApi.Operation;
-import org.isola.client.GameApi.Set;
-import org.isola.client.GameApi.SetTurn;
-import org.isola.client.GameApi.VerifyMove;
-import org.isola.client.GameApi.VerifyMoveDone;
+import org.game_api.GameApi.Delete;
+import org.game_api.GameApi.EndGame;
+import org.game_api.GameApi.Operation;
+import org.game_api.GameApi.Set;
+import org.game_api.GameApi.SetTurn;
+import org.game_api.GameApi.VerifyMove;
+import org.game_api.GameApi.VerifyMoveDone;
 import org.isola.client.Color;
 
 import com.google.common.collect.ImmutableList;
@@ -36,8 +36,8 @@ public class IsolaLogic {
 	private static final String B = "B"; // green hand
 	private static final String MOVE = "move";
 	private static final String DESTROY = "destroy";
-	private final static int rId = 11;
-	private final static int gId = 12;
+	private final static String rId = "42";
+	private final static String gId = "43";
 	
 	
 	public static VerifyMoveDone verify(VerifyMove verifyMove) {
@@ -66,12 +66,12 @@ public class IsolaLogic {
 	static List<Operation> getExpectedOperations(VerifyMove verifyMove) {
 	    List<Operation> lastMove = verifyMove.getLastMove();
 	    Map<String, Object> lastApiState = verifyMove.getLastState();
-	    List<Integer> playerIds = verifyMove.getPlayerIds();
+	    List<String> playerIds = verifyMove.getPlayerIds();
 	    if (lastApiState.isEmpty()) {
 	      return getMoveInitial(playerIds);
 	    }
 	    
-	    int lastMovePlayerId = verifyMove.getLastMovePlayerId();
+	    String lastMovePlayerId = verifyMove.getLastMovePlayerId();
 	    IsolaState laststate = gameApiStateToIsolatState(verifyMove.getLastState(), verifyMove.getPlayerIds(), 
 	    		Color.values()[playerIds.indexOf(lastMovePlayerId)]);
 	    
@@ -172,7 +172,7 @@ public class IsolaLogic {
 	}
 
 	@SuppressWarnings("unchecked")
-	static IsolaState gameApiStateToIsolatState( Map<String, Object> gameApiState, List<Integer> playerIds, Color turn) {
+	static IsolaState gameApiStateToIsolatState( Map<String, Object> gameApiState, List<String> playerIds, Color turn) {
 		
 		IsolaState state = new IsolaState(turn , gameApiState, playerIds);
 		
@@ -180,8 +180,8 @@ public class IsolaLogic {
 		
 	}
 	
-	 static List<Operation> getMoveInitial(List<Integer> playerIds) {
-		    int redPlayerId = playerIds.get(0);
+	 static List<Operation> getMoveInitial(List<String> playerIds) {
+		    String redPlayerId = playerIds.get(0);
 		    List<Operation> operations = Lists.newArrayList();
 		    
 		    operations.add(new SetTurn(redPlayerId));

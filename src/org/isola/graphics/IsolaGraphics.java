@@ -165,7 +165,6 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 
 	@Override
 	public void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions) {
-		System.out.println("selectMovePosition " + from.toString());
 		
 		myfrom = from;
 		final Color turn = turnOfColor;
@@ -197,11 +196,7 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	 * @param turn
 	 */
 	protected void makeMoveUpdate(Position from, Position to, Color turn) {
-		System.out.println("makeMoveUpdate: ");
-		System.out.println("from " + from.getRow() + from.getColumn() + "to " + to.getRow() + to.getColumn() + "turn " + turn.toString());
-		System.out.println();
-		
-		System.out.println("set from Pic");
+	
   	  	myPieces[from.getRow()][from.getColumn()] = new PieceImage(Color.W, from);
 	  	Image fromImage = new Image(pieceImageSupplier.getResource(myPieces[to.getRow()][to.getColumn()]));
 	  	myPanel[from.getRow()][from.getColumn()].clear();
@@ -209,7 +204,6 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  	gameGrid.clearCell(from.getRow(),from.getColumn());
 	  	gameGrid.setWidget(from.getRow(),from.getColumn(),myPanel[from.getRow()][from.getColumn()]);
 	  	
-	  	System.out.println("set to Pic");
 		myPieces[to.getRow()][to.getColumn()] = new PieceImage(turn, to);
   	  	Image toImage = new Image(pieceImageSupplier.getResource(myPieces[to.getRow()][to.getColumn()]));
   	  	myPanel[to.getRow()][to.getColumn()].clear();
@@ -249,7 +243,7 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	 * @param destroy
 	 */
 	protected void destroyUpdate(Position destroy) {
-		System.out.println("destroy " + destroy.getRow() + destroy.getColumn());
+	
 		int row = destroy.getRow();
 		int col = destroy.getColumn();
 		myPieces[row][col] = new PieceImage(Color.B, destroy);

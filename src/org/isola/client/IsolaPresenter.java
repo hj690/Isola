@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.isola.client.Color;
-import org.isola.client.GameApi.Container;
-import org.isola.client.GameApi.Operation;
-import org.isola.client.GameApi.Set;
-import org.isola.client.GameApi.SetTurn;
-import org.isola.client.GameApi.EndGame;
-import org.isola.client.GameApi.UpdateUI;
+import org.game_api.GameApi.Container;
+import org.game_api.GameApi.Operation;
+import org.game_api.GameApi.Set;
+import org.game_api.GameApi.SetTurn;
+import org.game_api.GameApi.EndGame;
+import org.game_api.GameApi.UpdateUI;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -29,8 +29,8 @@ public class IsolaPresenter {
 	private static final String G = "G"; // green hand
 	private static final String W = "W";
 	private static final String B = "B";
-	private final static int rId = 11;
-	private final static int gId = 12;
+	private final static String rId = "42";
+	private final static String gId = "43";
 
 	public interface View {
 
@@ -74,8 +74,8 @@ public class IsolaPresenter {
 
 	/** Updates the presenter and the view with the state in updateUI. */
 	public void updateUI(UpdateUI updateUI) {
-		List<Integer> playerIds = updateUI.getPlayerIds();
-		int yourPlayerId = updateUI.getYourPlayerId();
+		List<String> playerIds = updateUI.getPlayerIds();
+		String yourPlayerId = updateUI.getYourPlayerId();
 		int yourPlayerIndex = updateUI.getPlayerIndex(yourPlayerId);
 
 		// get my color
@@ -137,7 +137,7 @@ public class IsolaPresenter {
 //	}
 
 	public void movePositionSelected(Position position) {
-		System.out.println("movePositionSelected" + position.getRow() + position.getColumn());
+
 		check(isMyTurn());
 		to = position;
 		upDateState(from, to);
@@ -175,6 +175,12 @@ public class IsolaPresenter {
 		operations.add(new Set(position_To_Str(from), W));
 		operations.add(new Set(position_To_Str(to), (myC == Color.R ? R : G)));
 		operations.add(new Set(position_To_Str(destroy), B));
+		
+		//emulate the move and test if game end
+		state.setPieceColor(from, Color.W);
+		state.setPieceColor(to, myC);
+		state.setPieceColor(destroy, Color.B);
+		
 		if (!state.can_move(opponent)) {
 			operations.add(new EndGame(myC == Color.R ? rId : gId));
 		}
@@ -243,7 +249,7 @@ public class IsolaPresenter {
 		return myColor.isPresent() && myColor.get() == isolaState.getTurn();
 	}
 
-	private void sendInitialMove(List<Integer> playerIds) {
+	private void sendInitialMove(List<String> playerIds) {
 		container.sendMakeMove(isolaLogic.getMoveInitial(playerIds));
 	}
 
