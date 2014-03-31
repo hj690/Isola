@@ -22,7 +22,7 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
-
+  <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.isola.graphics.IsolaEntryPoint'/>
   <!-- Specify the paths for translatable code                    -->

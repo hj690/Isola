@@ -7,46 +7,50 @@ import java.util.Map;
 import org.isola.graphics.PieceImages;
 import org.isola.client.Color;
 import org.isola.client.IsolaPresenter;
-import org.isola.client.Piece;
 import org.isola.client.Position;
-import org.isola.graphics.PieceImages;
+import org.isola.graphics.ImageAnimation;
 
-import com.google.common.collect.Lists;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.AudioElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  public interface CheatGraphicsUiBinder extends UiBinder<Widget, IsolaGraphics> {
 	  }
-	  
+	  private static GameSounds gameSounds = GWT.create(GameSounds.class);
 	  private static PieceImages pieceImages = GWT.create(PieceImages.class);
 	  
 	  @UiField
 	  Grid gameGrid = new Grid();
 	 
-	  private boolean enableClicks = false;
 	  private final PieceImageSupplier pieceImageSupplier;
+	  
 	  private IsolaPresenter presenter;
-	  private FlowPanel[][] myPanel = new FlowPanel[7][7];
+	  private AbsolutePanel[][] myPanel = new AbsolutePanel[7][7];
 	  private PieceImage[][] myPieces = new PieceImage[7][7];
-	  private Color turn;
+	  private Image[][] myImages = new Image[7][7];
+	  
 	  private Position myfrom, myto, mydestroy;
-	  private Position lastclickPosition = new Position();
+	  private ImageAnimation animation;
 	  //handler for every cell
 	  private HandlerRegistration[][] handlers = new HandlerRegistration[7][7];
+	  private Audio pieceDestory;
+	  private Audio pieceDrop;
 	  
+	  private IsolaDropController target;
+		
 	  
 	  public IsolaGraphics(){
 		  PieceImages pieceImages = GWT.create(PieceImages.class);
@@ -54,6 +58,23 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		  CheatGraphicsUiBinder uiBinder = GWT.create(CheatGraphicsUiBinder.class);
 		  initWidget(uiBinder.createAndBindUi(this));
 		  initializeGrid();
+		  
+		  if (Audio.isSupported()) {
+			  pieceDestory = Audio.createIfSupported();
+			  pieceDestory.addSource(gameSounds.pieceDestoryMp3().getSafeUri()
+                              .asString(), AudioElement.TYPE_MP3);
+			  pieceDestory.addSource(gameSounds.pieceDestoryWav().getSafeUri()
+                              .asString(), AudioElement.TYPE_WAV);
+			  
+			  pieceDrop = Audio.createIfSupported();
+			  pieceDrop.addSource(gameSounds.pieceDropMp3().getSafeUri()
+                              .asString(), AudioElement.TYPE_MP3);
+			  pieceDrop.addSource(gameSounds.pieceDropWav().getSafeUri()
+                              .asString(), AudioElement.TYPE_WAV);
+            
+		  }
+		
+		  
 	  }
 	  
 	  /**
@@ -65,9 +86,9 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		  gameGrid.setCellPadding(0);
 		  gameGrid.setCellSpacing(0);
 		  gameGrid.setBorderWidth(1);
-		 
-		
 	}
+	  
+	  
 
 	  private void removeAllHandlers(List<Position> available_Move_Positions){
 		  for(Position p : available_Move_Positions)
@@ -93,6 +114,7 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 				  myPanel[i][j].setPixelSize(60, 60);
 				  myPanel[i][j].add(new Image(pieceImageSupplier.getResource(myPieces[i][j])));
 				  gameGrid.setWidget(i, j, myPanel[i][j]);
+				  
 			  }
 	  }
 	  
@@ -104,7 +126,8 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 			  for(int j = 0; j < 7; j++){
 				  
 				  Image image = new Image(pieceImageSupplier.getResource(myPieces[i][j]));
-				  FlowPanel imageContainer = new FlowPanel();
+				  myImages[i][j] = image;
+				  AbsolutePanel imageContainer = new AbsolutePanel();
 			      imageContainer.setStyleName("imgContainer");
 			      imageContainer.add(image);
 				  myPanel[i][j] = imageContainer;
@@ -143,6 +166,7 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 				default:
 					break;
 				}
+				
 				myPieces[p.getRow()][p.getColumn()] = new PieceImage(c, new Position(p.getRow(), p.getColumn()));
 				
 			}
@@ -154,7 +178,7 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		this.presenter = isolaPresenter;
 	}
 
-	private Image getTurnImageResource() {
+	private Image getTurnImageResource(Color turn) {
 		Image image;
 		if(turn == Color.R)
 			image = (Image)pieceImages.red();
@@ -165,8 +189,15 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 
 	@Override
 	public void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions) {
-		
 		myfrom = from;
+		//make my piece draggable
+		IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
+		dragCtrl.setBehaviorConstrainedToBoundaryPanel(true);
+		dragCtrl.setBehaviorMultipleSelection(false);
+		dragCtrl.setBehaviorDragStartSensitivity(25);
+		
+		dragCtrl.makeDraggable(myImages[from.getRow()][from.getColumn()]);
+		
 		final Color turn = turnOfColor;
 		final List<Position> positions = available_Move_Positions;
 		for(Position p : available_Move_Positions){
@@ -176,13 +207,19 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		          @Override
 		          public void onClick(ClickEvent event) {
 		        	  myto = destination;
-		        	  makeMoveUpdate(myfrom, myto, turn);
+		        	  makeMoveUpdate(myfrom, myto, turn, true);
 		        	  removeAllHandlers(positions);
 		        	  presenter.movePositionSelected(destination);
 		          }
 		        });
+			
+			target = new IsolaDropController(image, this,  presenter, from, turnOfColor, available_Move_Positions);
+			dragCtrl.registerDropController(target);
+			myImages[p.getRow()][p.getColumn()] = image;
+			
 			myPanel[p.getRow()][p.getColumn()].clear();
 			myPanel[p.getRow()][p.getColumn()].add(image);
+			
 			gameGrid.clearCell(p.getRow(),p.getColumn());
 			gameGrid.setWidget(p.getRow(),p.getColumn(), myPanel[p.getRow()][p.getColumn()]);
 		}
@@ -195,24 +232,31 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	 * @param to
 	 * @param turn
 	 */
-	protected void makeMoveUpdate(Position from, Position to, Color turn) {
-	
+	public void makeMoveUpdate(Position from, Position to, Color turn, boolean hasAnimation) {
+		
   	  	myPieces[from.getRow()][from.getColumn()] = new PieceImage(Color.W, from);
 	  	Image fromImage = new Image(pieceImageSupplier.getResource(myPieces[to.getRow()][to.getColumn()]));
+	  	
+	  	myPieces[to.getRow()][to.getColumn()] = new PieceImage(turn, to);
+  	  	Image toImage = new Image(pieceImageSupplier.getResource(myPieces[to.getRow()][to.getColumn()]));
+  	  	if(hasAnimation)
+  	  		presenter.DoAnimation(fromImage, myPanel[from.getRow()][from.getColumn()].getAbsoluteLeft() , myPanel[from.getRow()][from.getColumn()].getAbsoluteTop(),
+  	  	
+  	  	myPanel[to.getRow()][to.getColumn()].getAbsoluteLeft(), myPanel[to.getRow()][to.getColumn()].getAbsoluteTop(), toImage, pieceDrop);
+	  	
 	  	myPanel[from.getRow()][from.getColumn()].clear();
 	  	myPanel[from.getRow()][from.getColumn()].add(fromImage);
+	  	myImages[from.getRow()][from.getColumn()] = fromImage;
 	  	gameGrid.clearCell(from.getRow(),from.getColumn());
 	  	gameGrid.setWidget(from.getRow(),from.getColumn(),myPanel[from.getRow()][from.getColumn()]);
 	  	
-		myPieces[to.getRow()][to.getColumn()] = new PieceImage(turn, to);
-  	  	Image toImage = new Image(pieceImageSupplier.getResource(myPieces[to.getRow()][to.getColumn()]));
+		
   	  	myPanel[to.getRow()][to.getColumn()].clear();
   	  	myPanel[to.getRow()][to.getColumn()].add(toImage);
+  	    myImages[to.getRow()][to.getColumn()] = toImage;
   	  	gameGrid.clearCell(to.getRow(),to.getColumn());
   	  	gameGrid.setWidget(to.getRow(),to.getColumn(),myPanel[to.getRow()][to.getColumn()]);
-  	  	
-  	  	
-	  	
+
 	}
 
 	@Override
@@ -232,8 +276,10 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		        });
 			myPanel[p.getRow()][p.getColumn()].clear();
 			myPanel[p.getRow()][p.getColumn()].add(image);
+			myImages[p.getRow()][p.getColumn()] = image;
 			gameGrid.clearCell(p.getRow(),p.getColumn());
 			gameGrid.setWidget(p.getRow(),p.getColumn(),myPanel[p.getRow()][p.getColumn()]);
+			
 		}
 		
 	}
@@ -250,11 +296,11 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  	Image destroyImage = new Image(pieceImageSupplier.getResource(myPieces[row][col]));
 	  	myPanel[row][col].clear();
 	  	myPanel[row][col].add(destroyImage);
+	  	myImages[row][col] = destroyImage;
 	  	gameGrid.clearCell(row, col);
 	  	gameGrid.setWidget(row, col ,myPanel[row][col]);
-		
+	  	pieceDestory.play();
 	}
 
-	  
-	  
+
 }

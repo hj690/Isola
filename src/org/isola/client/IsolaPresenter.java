@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.isola.client.Color;
+import org.isola.graphics.ImageAnimation;
 import org.game_api.GameApi.Container;
 import org.game_api.GameApi.Operation;
 import org.game_api.GameApi.Set;
@@ -15,6 +16,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.media.client.Audio;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Image;
+import com.allen_sauer.gwt.dnd.client.DragHandler;
+import com.allen_sauer.gwt.dnd.client.DragHandlerAdapter;
+import com.allen_sauer.gwt.dnd.client.DragStartEvent;
 
 /**
  * The presenter that controls the cheat graphics. We use the MVP pattern: the
@@ -32,6 +39,7 @@ public class IsolaPresenter {
 	private final static String rId = "42";
 	private final static String gId = "43";
 
+	
 	public interface View {
 
 		void setPresenter(IsolaPresenter isolaPresenter);
@@ -52,7 +60,7 @@ public class IsolaPresenter {
 		//void selectMovePosition(Position from);
 
 		void chooseDestroy(List<Position> available_Destroy_Positions);
-		//void chooseDestroy();
+		//void chooseDestroy()
 
 		
 	}
@@ -117,7 +125,7 @@ public class IsolaPresenter {
 		if (isMyTurn()) {
 			if (isolaState.can_move(myC)){
 				from = isolaState.getPlayerPosition(myC);
-				view.selectMovePosition(turnOfColor, from, get_available_Move_Positions());
+				view.selectMovePosition(turnOfColor, from, get_available_Move_Positions(isolaState, from));
 			}
 				
 			
@@ -141,7 +149,7 @@ public class IsolaPresenter {
 		check(isMyTurn());
 		to = position;
 		upDateState(from, to);
-		view.chooseDestroy(get_available_Destroy_Positions());
+		view.chooseDestroy(get_available_Destroy_Positions(isolaState));
 		//view.chooseDestroy();
 	}
 
@@ -192,7 +200,7 @@ public class IsolaPresenter {
 				+ Integer.toString(position.getColumn());
 	}
 
-	public List<Position> get_available_Destroy_Positions() {
+	public List<Position> get_available_Destroy_Positions(IsolaState isolaState) {
 		List<Position> positions = Lists.newArrayList();
 		Position tmp = new Position();
 		for (int i = 0; i < 7; i++)
@@ -204,7 +212,7 @@ public class IsolaPresenter {
 		return positions;
 	}
 
-	public List<Position> get_available_Move_Positions() {
+	public List<Position> get_available_Move_Positions(IsolaState isolaState, Position from) {
 		List<Position> positions = Lists.newArrayList();
 		int row = from.getRow();
 		int col = from.getColumn();
@@ -252,5 +260,13 @@ public class IsolaPresenter {
 	private void sendInitialMove(List<String> playerIds) {
 		container.sendMakeMove(isolaLogic.getMoveInitial(playerIds));
 	}
+	
+	public void DoAnimation(Image img, int a, int b, int x, int y, Image source, Audio pieceDrop) {
+		ImageAnimation ia = new ImageAnimation(img, a, b, x, y, source, pieceDrop);
+		ia.run(1300);
+        
+	}
+	
+ 
 
 }

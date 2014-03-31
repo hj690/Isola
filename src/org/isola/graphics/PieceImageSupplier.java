@@ -1,7 +1,9 @@
 package org.isola.graphics;
 
+import org.isola.client.Color;
 import org.isola.graphics.PieceImage;
 import org.isola.graphics.PieceImages;
+
 import com.google.gwt.resources.client.ImageResource;
 
 public class PieceImageSupplier {
@@ -23,6 +25,21 @@ public class PieceImageSupplier {
 	        return getGreenPiece();
 	      default:
 	        throw new RuntimeException("Forgot kind=" + pieceImage.getColor());
+	    }
+	  }
+	
+	public ImageResource getResource( Color c) {
+	    switch (c) {
+	      case B:
+	        return getBlackPiece();
+	      case W:
+	        return getWhitePiece();
+	      case R:
+	        return getRedPiece();
+	      case G:
+	        return getGreenPiece();
+	      default:
+	        throw new RuntimeException("Forgot kind=" + c);
 	    }
 	  }
 
