@@ -55,7 +55,7 @@ public class IsolaPresenter {
 		void setPlayerState(Map<String, Object> gameApiState); // arguments expected
 
 	//	void selectPiece(Color color, Position position); // select red|green piece
-		void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions);
+		void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions, UpdateUI updateUI);
 
 		//void selectMovePosition(Position from);
 
@@ -125,7 +125,7 @@ public class IsolaPresenter {
 		if (isMyTurn()) {
 			if (isolaState.can_move(myC)){
 				from = isolaState.getPlayerPosition(myC);
-				view.selectMovePosition(turnOfColor, from, get_available_Move_Positions(isolaState, from));
+				view.selectMovePosition(turnOfColor, from, get_available_Move_Positions(isolaState, from), updateUI);
 			}
 				
 			
@@ -263,7 +263,7 @@ public class IsolaPresenter {
 	
 	public void DoAnimation(Image img, int a, int b, int x, int y, Image source, Audio pieceDrop) {
 		ImageAnimation ia = new ImageAnimation(img, a, b, x, y, source, pieceDrop);
-		ia.run(1300);
+		ia.run(500);
         
 	}
 	

@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.game_api.GameApi.UpdateUI;
 import org.isola.graphics.PieceImages;
 import org.isola.client.Color;
 import org.isola.client.IsolaPresenter;
@@ -188,13 +189,13 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	}
 
 	@Override
-	public void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions) {
+	public void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions, UpdateUI updateUI) {
 		myfrom = from;
 		//make my piece draggable
 		IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
 		dragCtrl.setBehaviorConstrainedToBoundaryPanel(true);
 		dragCtrl.setBehaviorMultipleSelection(false);
-		dragCtrl.setBehaviorDragStartSensitivity(25);
+		dragCtrl.setBehaviorDragStartSensitivity(1);
 		
 		dragCtrl.makeDraggable(myImages[from.getRow()][from.getColumn()]);
 		
@@ -213,8 +214,8 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		          }
 		        });
 			
-			target = new IsolaDropController(image, this,  presenter, from, turnOfColor, available_Move_Positions);
-			dragCtrl.registerDropController(target);
+//			target = new IsolaDropController(image, this,  presenter, from, turnOfColor, available_Move_Positions);
+//			dragCtrl.registerDropController(target);
 			myImages[p.getRow()][p.getColumn()] = image;
 			
 			myPanel[p.getRow()][p.getColumn()].clear();
@@ -223,6 +224,13 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 			gameGrid.clearCell(p.getRow(),p.getColumn());
 			gameGrid.setWidget(p.getRow(),p.getColumn(), myPanel[p.getRow()][p.getColumn()]);
 		}
+		
+		//register for every square
+		for(int i = 0; i < 7; i++)
+			for(int j = 0; j < 7; j++){
+				target = new IsolaDropController(myImages[i][j], this,  presenter, myfrom, turnOfColor, available_Move_Positions, updateUI, pieceDrop);
+				dragCtrl.registerDropController(target);
+			}
 		
 	}
 
@@ -302,5 +310,43 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  	pieceDestory.play();
 	}
 
+	/*
+	public void moveDropperBack(Position dropper, Color turn, List<Position> available_Move_Positions) {
+		IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
+		dragCtrl.setBehaviorConstrainedToBoundaryPanel(true);
+		dragCtrl.setBehaviorMultipleSelection(false);
+		dragCtrl.setBehaviorDragStartSensitivity(1);
+		
+		int row = dropper.getRow();
+		int col = dropper.getColumn();
+		myPieces[row][col] = new PieceImage(turn, dropper);
+		Image image = new Image(pieceImageSupplier.getResource(myPieces[row][col]));
+		dragCtrl.makeDraggable(image);
+		myImages[row][col] = image;
+		myPanel[row][col].clear();
+		myPanel[row][col].add(image);
+		gameGrid.clearCell(row,col);
+		gameGrid.setWidget(row,col,myPanel[row][col]);
+		
+		//register for every square
+		for(int i = 0; i < 7; i++)
+			for(int j = 0; j < 7; j++){
+				target = new IsolaDropController(myImages[i][j], this,  presenter, myfrom, turn, available_Move_Positions);
+				dragCtrl.registerDropController(target);
+			}		
+		
+	}
 
+	public void setIllegalTarget(Position illegalTarget) {
+		int row = illegalTarget.getRow();
+		int col = illegalTarget.getColumn();
+		Image image = new Image(pieceImageSupplier.getResource(myPieces[row][col]));
+		myPanel[row][col].clear();
+		myPanel[row][col].add(image);
+		gameGrid.clearCell(row,col);
+		gameGrid.setWidget(row,col,myPanel[row][col]);
+		
+		
+	}
+*/
 }
