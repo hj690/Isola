@@ -16,7 +16,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
-
+/*
 public class IsolaEntryPoint implements EntryPoint {
 	Container container;
 	IsolaPresenter isolaPresenter;
@@ -42,8 +42,8 @@ public class IsolaEntryPoint implements EntryPoint {
 	    container.sendGameReady();
 	  }
 }
+*/
 
-/*
 public class IsolaEntryPoint implements EntryPoint {
 	IteratingPlayerContainer container;
 	IsolaPresenter isolaPresenter;
@@ -87,4 +87,3 @@ public class IsolaEntryPoint implements EntryPoint {
 		container.updateUi(container.getPlayerIds().get(0));
 	}
 }
-*/

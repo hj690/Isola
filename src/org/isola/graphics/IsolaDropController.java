@@ -42,7 +42,7 @@ public class IsolaDropController extends SimpleDropController {
 	   
 	    if(includePos(available_Move_Positions, target)){
 	    	if(pieceDrop != null)
-	    		pieceDrop.play();
+	    		//pieceDrop.play();
 	    	view.makeMoveUpdate(startPos, target, turn, false); // the last "false" means don't do animation
 	    	presenter.movePositionSelected(target);
 	    }

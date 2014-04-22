@@ -52,7 +52,7 @@ public class ImageAnimation extends Animation {
     protected void onComplete() {
             super.onComplete();
             if(soundOfDrop != null)
-            	soundOfDrop.play();
+            	//soundOfDrop.play();
             pp.hide();
             source.setVisible(true);
 

@@ -35,7 +35,10 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  
 	  @UiField
 	  Grid gameGrid = new Grid();
-	 
+	  
+	  @UiField
+	  AbsolutePanel boardArea = new AbsolutePanel(); 
+	  
 	  private final PieceImageSupplier pieceImageSupplier;
 	  
 	  private IsolaPresenter presenter;
@@ -66,27 +69,28 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
                               .asString(), AudioElement.TYPE_MP3);
 			  pieceDestory.addSource(gameSounds.pieceDestoryWav().getSafeUri()
                               .asString(), AudioElement.TYPE_WAV);
-			  
 			  pieceDrop = Audio.createIfSupported();
 			  pieceDrop.addSource(gameSounds.pieceDropMp3().getSafeUri()
                               .asString(), AudioElement.TYPE_MP3);
 			  pieceDrop.addSource(gameSounds.pieceDropWav().getSafeUri()
                               .asString(), AudioElement.TYPE_WAV);
             
-		  }
-		
-		  
+		  }	  
 	  }
 	  
 	  /**
 	   * initialize the Grid
 	   */
-	  private void initializeGrid() {
+	  private void initializeGrid() {	  
 		  gameGrid.setPixelSize(420, 420);
 		  gameGrid.resize(7, 7);
 		  gameGrid.setCellPadding(0);
 		  gameGrid.setCellSpacing(0);
 		  gameGrid.setBorderWidth(1);
+		  
+		  boardArea.setPixelSize(435, 435);
+		  boardArea.add(gameGrid);
+
 	}
 	  
 	  
@@ -192,7 +196,8 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	public void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions, UpdateUI updateUI) {
 		myfrom = from;
 		//make my piece draggable
-		IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
+	//	IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
+		IsolaDragController dragCtrl = new IsolaDragController(boardArea, false, presenter);
 		dragCtrl.setBehaviorConstrainedToBoundaryPanel(true);
 		dragCtrl.setBehaviorMultipleSelection(false);
 		dragCtrl.setBehaviorDragStartSensitivity(1);
@@ -307,7 +312,7 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  	myImages[row][col] = destroyImage;
 	  	gameGrid.clearCell(row, col);
 	  	gameGrid.setWidget(row, col ,myPanel[row][col]);
-	  	pieceDestory.play();
+	  	//pieceDestory.play();
 	}
 
 	/*
