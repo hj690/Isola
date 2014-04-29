@@ -23,17 +23,17 @@ public class ImageAnimation extends Animation {
     int rowI;
     int colI;
 
-    public ImageAnimation(Image wg, int sx, int sy, int fx, int fy, Image ogn, Audio pieceDrop) {
+    public ImageAnimation(Image wg, int sRow, int sCol, int fRow, int fCol, Image ogn, Audio pieceDrop) {
             VerticalPanel vp = new VerticalPanel();
             this.wg = wg;
             vp.add(wg);
             this.pp.setWidget(vp);
-            this.startX = sx;
-            this.startY = sy;
+            this.startX = (sCol) * wg.getWidth();
+            this.startY = (sRow) * wg.getHeight();
             pp.setPopupPosition(startX, startY);
             pp.show();
-            this.finalX = fx;
-            this.finalY = fy;
+            this.finalX = (fCol) * ogn.getWidth();
+            this.finalY = (fRow) * ogn.getHeight();
             soundOfDrop = pieceDrop;
             source = ogn;
             source.setVisible(false);

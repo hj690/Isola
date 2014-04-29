@@ -82,13 +82,13 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	   * initialize the Grid
 	   */
 	  private void initializeGrid() {	  
-		  gameGrid.setPixelSize(420, 420);
+		 // gameGrid.setPixelSize(420, 420);
 		  gameGrid.resize(7, 7);
 		  gameGrid.setCellPadding(0);
 		  gameGrid.setCellSpacing(0);
 		  gameGrid.setBorderWidth(1);
 		  
-		  boardArea.setPixelSize(435, 435);
+		//  boardArea.setPixelSize(435, 435);
 		  boardArea.add(gameGrid);
 
 	}
@@ -253,9 +253,8 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  	myPieces[to.getRow()][to.getColumn()] = new PieceImage(turn, to);
   	  	Image toImage = new Image(pieceImageSupplier.getResource(myPieces[to.getRow()][to.getColumn()]));
   	  	if(hasAnimation)
-  	  		presenter.DoAnimation(fromImage, myPanel[from.getRow()][from.getColumn()].getAbsoluteLeft() , myPanel[from.getRow()][from.getColumn()].getAbsoluteTop(),
-  	  	
-  	  	myPanel[to.getRow()][to.getColumn()].getAbsoluteLeft(), myPanel[to.getRow()][to.getColumn()].getAbsoluteTop(), toImage, pieceDrop);
+  	  		presenter.DoAnimation(fromImage, from.getRow() , from.getColumn(),
+                                  to.getRow(), to.getColumn(), toImage, pieceDrop);
 	  	
 	  	myPanel[from.getRow()][from.getColumn()].clear();
 	  	myPanel[from.getRow()][from.getColumn()].add(fromImage);
