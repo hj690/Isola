@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,6 +39,12 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  
 	  @UiField
 	  AbsolutePanel boardArea = new AbsolutePanel(); 
+	  
+	  @UiField
+	  HTMLPanel intro, action1, action2;
+	  
+	  UIConstants myConstants = GWT.create(UIConstants.class);
+	  
 	  
 	  private final PieceImageSupplier pieceImageSupplier;
 	  
@@ -62,6 +69,9 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 		  CheatGraphicsUiBinder uiBinder = GWT.create(CheatGraphicsUiBinder.class);
 		  initWidget(uiBinder.createAndBindUi(this));
 		  initializeGrid();
+		  intro.getElement().setInnerText(myConstants.intro());
+		  action1.getElement().setInnerText(myConstants.action1());
+		  action2.getElement().setInnerText(myConstants.action2());
 		  
 		  if (Audio.isSupported()) {
 			  pieceDestory = Audio.createIfSupported();
@@ -195,8 +205,8 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	@Override
 	public void selectMovePosition(Color turnOfColor, Position from, List<Position> available_Move_Positions, UpdateUI updateUI) {
 		myfrom = from;
+		
 		//make my piece draggable
-	//	IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
 		IsolaDragController dragCtrl = new IsolaDragController(boardArea, false, presenter);
 		dragCtrl.setBehaviorConstrainedToBoundaryPanel(true);
 		dragCtrl.setBehaviorMultipleSelection(false);
@@ -314,43 +324,4 @@ public class IsolaGraphics extends Composite implements IsolaPresenter.View {
 	  	//pieceDestory.play();
 	}
 
-	/*
-	public void moveDropperBack(Position dropper, Color turn, List<Position> available_Move_Positions) {
-		IsolaDragController dragCtrl = new IsolaDragController(RootPanel.get(), false, presenter);
-		dragCtrl.setBehaviorConstrainedToBoundaryPanel(true);
-		dragCtrl.setBehaviorMultipleSelection(false);
-		dragCtrl.setBehaviorDragStartSensitivity(1);
-		
-		int row = dropper.getRow();
-		int col = dropper.getColumn();
-		myPieces[row][col] = new PieceImage(turn, dropper);
-		Image image = new Image(pieceImageSupplier.getResource(myPieces[row][col]));
-		dragCtrl.makeDraggable(image);
-		myImages[row][col] = image;
-		myPanel[row][col].clear();
-		myPanel[row][col].add(image);
-		gameGrid.clearCell(row,col);
-		gameGrid.setWidget(row,col,myPanel[row][col]);
-		
-		//register for every square
-		for(int i = 0; i < 7; i++)
-			for(int j = 0; j < 7; j++){
-				target = new IsolaDropController(myImages[i][j], this,  presenter, myfrom, turn, available_Move_Positions);
-				dragCtrl.registerDropController(target);
-			}		
-		
-	}
-
-	public void setIllegalTarget(Position illegalTarget) {
-		int row = illegalTarget.getRow();
-		int col = illegalTarget.getColumn();
-		Image image = new Image(pieceImageSupplier.getResource(myPieces[row][col]));
-		myPanel[row][col].clear();
-		myPanel[row][col].add(image);
-		gameGrid.clearCell(row,col);
-		gameGrid.setWidget(row,col,myPanel[row][col]);
-		
-		
-	}
-*/
 }

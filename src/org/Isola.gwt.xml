@@ -23,6 +23,9 @@
 
   <!-- Other module inherits                                      -->
   <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
+  <inherits name="com.google.gwt.i18n.I18N"/>
+  <extend-property name="locale" values="en"/>
+  <extend-property name="locale" values="zh"/>
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.isola.graphics.IsolaEntryPoint'/>
   <!-- Specify the paths for translatable code                    -->

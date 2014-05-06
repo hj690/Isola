@@ -60,6 +60,7 @@ public class IsolaLogic {
 		    if (verifyMove.getLastState().isEmpty()) {
 		      check(verifyMove.getLastMovePlayerId() == verifyMove.getPlayerIds().get(0));
 		    }
+		    
 		  }
 	
 	 @SuppressWarnings("unchecked")
@@ -105,15 +106,19 @@ public class IsolaLogic {
 	    //if move the right piece
 		Color turn = laststate.getTurn();
 		check(laststate.getPieceColor(from) == turn);
+	
 			
 		//if from position ok
 		check(from.is_in_board());
+	
 			
 		//is move to neighbor?
 		check(move_to_neighbor(from, to));
+	
 			
 		//if to position blank
 		check(laststate.getPieceColor(to) == Color.W);
+
 	    
 		/**
 		 * make move
@@ -133,7 +138,6 @@ public class IsolaLogic {
 	 
 	    //if destroy position ok
 		check(destroy.is_in_board() && laststate.getPieceColor(destroy) == Color.W);
-	    
 		/**
 		 * make destroy
 		 */
@@ -194,6 +198,7 @@ public class IsolaLogic {
 	
 	 private static void check(boolean val, Object... debugArguments) {
 		    if (!val) {
+		    	
 		      throw new RuntimeException("We have a hacker! debugArguments="
 		          + Arrays.toString(debugArguments));
 		    }

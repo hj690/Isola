@@ -65,8 +65,8 @@ public class IsolaDropController extends SimpleDropController {
 	  }
 	  
 	  public Position getPosition(Image image) {
-	    int top = image.getAbsoluteTop();
-	    int left = image.getAbsoluteLeft();
+	  //  int top = image.getAbsoluteTop();
+	  //  int left = image.getAbsoluteLeft();
 	    int row = (image.getAbsoluteTop() / 60);
 	    int col = (image.getAbsoluteLeft() / 60);
 	 

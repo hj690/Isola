@@ -59,6 +59,47 @@ public class IsolaState {
 		
 
 	}
+	
+	
+	public IsolaState(Map<String, Object> gameApiState) {
+		this.turn = gameApiState.get("turn") == "G"? Color.G : Color.R;
+		this.playerIds = new ArrayList<String>();
+		
+		for (int i = 0; i < 7; i++) { // row
+			for (int j = 0; j < 7; j++) { // column
+					this.board[i][j] = new Piece(i, j, W);
+				}
+			}
+		Iterator it = gameApiState.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry entry = (Map.Entry) it.next(); 
+			String pos = (String)entry.getKey();
+			String color = (String)entry.getValue();
+			int posInt = Integer.parseInt(pos);
+			Position p = new Position((posInt - posInt%10)/10, posInt%10);
+			Color c = Color.W;
+			switch (color){
+			case "R":
+				c = Color.R;
+				break;
+			case "G":
+				c = Color.G;
+				break;
+			case "B":
+				c = Color.B;
+				break;
+			case "W":
+				c = Color.W;
+				break;
+			default:
+				break;
+			}
+			this.board[p.getRow()][p.getColumn()] = new Piece(p.getRow(), p.getColumn(), c);
+			
+		}
+		
+
+	}
 
 	public void setTurn(Color turn) {
 		this.turn = turn;
@@ -89,7 +130,10 @@ public class IsolaState {
 	}
 
 	public Color getPieceColor(int row, int column) {
-		return board[row][column].getColor();
+		if(row >= 0 && row <= 6 && column >= 0 && column <= 6)
+			return board[row][column].getColor();
+		else
+			return Color.B;
 	}
 
 	public Color getPieceColor(Position position) {

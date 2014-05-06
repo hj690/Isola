@@ -16,11 +16,12 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
-/*
+
 public class IsolaEntryPoint implements EntryPoint {
 	Container container;
 	IsolaPresenter isolaPresenter;
 
+	
 	  @Override
 	  public void onModuleLoad() {
 	    Game game = new Game() {
@@ -39,10 +40,11 @@ public class IsolaEntryPoint implements EntryPoint {
 	    isolaPresenter = new IsolaPresenter(isolaGraphics, container);
 
 	    RootPanel.get("mainDiv").add(isolaGraphics);
+	    
 	    container.sendGameReady();
 	  }
 }
-*/
+/*
 
 public class IsolaEntryPoint implements EntryPoint {
 	IteratingPlayerContainer container;
@@ -86,4 +88,4 @@ public class IsolaEntryPoint implements EntryPoint {
 		container.sendGameReady();
 		container.updateUi(container.getPlayerIds().get(0));
 	}
-}
+}*/

@@ -5,5 +5,19 @@
   	<g:AbsolutePanel ui:field="boardArea">
   		 <g:Grid ui:field="gameGrid"/>
   	</g:AbsolutePanel>
+  	
+  	<g:HTMLPanel ui:field="intro">
+  	A move consists of two subsequent actions:
+  	</g:HTMLPanel>
+  	
+  	<g:HTMLPanel ui:field="action1">
+ 	 Choose an empty square to move to(horizontally, vertically, or diagonally)
+  	</g:HTMLPanel>
+  	
+  	<g:HTMLPanel ui:field="action2">
+  	Choose an empty square to place a bomb.
+  	</g:HTMLPanel>
+  	
+  	
   </g:VerticalPanel>
 </ui:UiBinder> 

@@ -17,6 +17,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.media.client.Audio;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
 import com.allen_sauer.gwt.dnd.client.DragHandler;
@@ -38,7 +40,7 @@ public class IsolaPresenter {
 	private static final String B = "B";
 	private final static String rId = "42";
 	private final static String gId = "43";
-
+	static String opponentPlayerId;
 	
 	public interface View {
 
@@ -84,12 +86,14 @@ public class IsolaPresenter {
 	public void updateUI(UpdateUI updateUI) {
 		List<String> playerIds = updateUI.getPlayerIds();
 		String yourPlayerId = updateUI.getYourPlayerId();
+		
 		int yourPlayerIndex = updateUI.getPlayerIndex(yourPlayerId);
-
+		int opponentPlayerIndex = 1 - yourPlayerIndex;
+		
 		// get my color
 		myColor = yourPlayerIndex == 0 ? Optional.of(Color.R)
-				: yourPlayerIndex == 1 ? Optional.of(Color.G) : Optional.<Color> absent();
-
+					: yourPlayerIndex == 1 ? Optional.of(Color.G) : Optional.<Color> absent();
+						
 		if (updateUI.getState().isEmpty()) {
 			// The R player sends the initial setup move.
 			if (myColor.isPresent() && myColor.get().isRed()) {
@@ -98,15 +102,6 @@ public class IsolaPresenter {
 			return;
 		}
 
-		if (updateUI.isViewer()) {
-			view.setViewerState(updateUI.getState());
-			return;
-		}
-		if (updateUI.isAiPlayer()) {
-			// TODO: implement AI in a later HW!
-			// container.sendMakeMove(..);
-			return;
-		}
 
 		Color turnOfColor = null;
 		for (Operation operation : updateUI.getLastMove()) {
@@ -114,8 +109,42 @@ public class IsolaPresenter {
 				turnOfColor = Color.values()[playerIds.indexOf(((SetTurn) operation).getPlayerId())];
 			}
 		}
-		
+		if (-1 != yourPlayerIndex){
+			opponentPlayerId = updateUI.getPlayerIds().get(opponentPlayerIndex);
+		}	
+			
 		isolaState = isolaLogic.gameApiStateToIsolatState(updateUI.getState(), playerIds, turnOfColor);
+		
+		
+		
+		if (updateUI.isViewer()) {
+			view.setViewerState(updateUI.getState());
+			return;
+		}
+		if (updateUI.isAiPlayer()) {
+			if (!isMyTurn())
+				return;
+
+			Heuristic gameHeuristic = new Heuristic();
+			AlphaBetaPruning pruning = new AlphaBetaPruning(gameHeuristic);
+			List<Operation> moves = pruning.findBestMove(updateUI.getState(), turnOfColor, 4, new Timer(){
+				public void run(){
+					System.out.println("timer start");
+				}
+			});
+			String fromStr = ((Set)moves.get(0)).getKey();
+			String toStr = ((Set)moves.get(1)).getKey();
+			String destoryStr = ((Set)moves.get(2)).getKey();
+			
+			makeMyMove( strToPos(fromStr) , strToPos(toStr),  strToPos(destoryStr));
+
+			// TODO: implement AI in a later HW!
+			//container.sendMakeMove(..);
+			return;
+		}
+
+		
+		
 
 		// Must be a player!
 		Color myC = myColor.get();
@@ -127,22 +156,23 @@ public class IsolaPresenter {
 				from = isolaState.getPlayerPosition(myC);
 				view.selectMovePosition(turnOfColor, from, get_available_Move_Positions(isolaState, from), updateUI);
 			}
+			else
+				Window.alert("You lose!");
 				
 			
 		}
+	}
+
+	private Position strToPos(String str) {
+		int posInt = Integer.parseInt(str);
+		Position p = new Position((posInt - posInt%10)/10, posInt%10);
+		return p;
 	}
 
 	private void check(boolean val) {
 		if (!val)
 			throw new IllegalArgumentException();
 	}
-
-//	public void pieceSelected(Position position) {
-//		check(isMyTurn());
-//		from = position;
-//		view.selectMovePosition(get_available_Move_Positions(isolaState,from));
-//		//view.selectMovePosition(from);
-//	}
 
 	public void movePositionSelected(Position position) {
 
@@ -179,7 +209,7 @@ public class IsolaPresenter {
 		 * turn), set(destroyPosition, B), (optional)EndGame(playerId).
 		 */
 		List<Operation> operations = Lists.newArrayList();
-		operations.add(new SetTurn(opponent == Color.R ? rId : gId));
+		operations.add(new SetTurn(opponentPlayerId));
 		operations.add(new Set(position_To_Str(from), W));
 		operations.add(new Set(position_To_Str(to), (myC == Color.R ? R : G)));
 		operations.add(new Set(position_To_Str(destroy), B));
@@ -191,6 +221,7 @@ public class IsolaPresenter {
 		
 		if (!state.can_move(opponent)) {
 			operations.add(new EndGame(myC == Color.R ? rId : gId));
+			Window.alert("You win!");
 		}
 		return operations;
 	}
