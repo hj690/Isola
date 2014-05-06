@@ -34,4 +34,5 @@
 
   <!-- allow Super Dev Mode -->
   <add-linker name="xsiframe"/>
+  
 </module>
